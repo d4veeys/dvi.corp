@@ -37,7 +37,7 @@ const ADDITIONALS = {
 };
 
 const CONFIG = {
-    deliveryFee: 0.00,
+    deliveryFee: 'A combinar',
     whatsappNumber: '5569992588282', 
     prepareTime: '25-40',
     minDeliveryValue: 0 // Valor mínimo para delivery
