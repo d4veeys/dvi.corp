@@ -1,2 +1,2 @@
 # dvi.corp
-DVI corp é um sistema mundial de soluções tecnologicas para problemas fisicos e cotidianos.
+DVI corp é um sistema de soluções simples.
