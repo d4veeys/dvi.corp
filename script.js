@@ -5,19 +5,19 @@ const PRODUCTS = {
         name: 'Pão da Casa', 
         price: 20.00, 
         category: 'lanche',
-        description: 'Pão, carne 120g, queijo, alface e banana frita'
+        description: 'Pão, 120g de costela defumada, queijo, alface e banana frita'
     },
     'titi': { 
         name: 'Pão do Titi', 
-        price: 25.00, 
+        price: 27.00, 
         category: 'lanche',
-        description: 'Pão, carne 120g, queijo, bacon, alface, cebola roxa e banana frita'
+        description: 'Pão, 150g de costela defumada, queijo mmussarela, bacon, alface, cebola roxa e banana frita'
     },
     'premium': { 
-        name: 'Costela Premium', 
+        name: 'Cupim Premium', 
         price: 29.90, 
         category: 'lanche',
-        description: 'Pão baguete, costela defumada 180g, queijo cheddar, cebola caramelizada e molho barbecue'
+        description: 'Pão baguete, cupim defumado 150g, queijo cheddar, cebola caramelizada e molho barbecue'
     },
     // Bebidas
     'agua_mineral': { name: 'Água Mineral', price: 3.00, category: 'bebida' },
@@ -37,9 +37,9 @@ const ADDITIONALS = {
 };
 
 const CONFIG = {
-    deliveryFee: 5.00,
-    whatsappNumber: '5511999999999', // Substitua pelo número real
-    prepareTime: '15-20',
+    deliveryFee: 0.00,
+    whatsappNumber: '5569992588282', 
+    prepareTime: '25-40',
     minDeliveryValue: 0 // Valor mínimo para delivery
 };
 
