@@ -41,7 +41,7 @@ const ADDITIONALS = {
 
 const CONFIG = {
     deliveryText: "A combinar", // Alterado para texto em vez de valor fixo
-    whatsappNumber: '5511999999999',
+    whatsappNumber: '5569992588282',
     prepareTime: '15-20',
     minDeliveryValue: 0
 };
