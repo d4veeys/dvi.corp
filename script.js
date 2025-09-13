@@ -5,29 +5,31 @@ const PRODUCTS = {
         name: 'Pão da Casa', 
         price: 20.00, 
         category: 'lanche',
-        description: 'Pão artesanal, costela defumada 120g, queijo coalho derretido, alface crocante e banana frita caramelizada'
+        description: 'Pão, carne 120g, queijo, alface e banana frita',
+        available: true
     },
     'titi': { 
         name: 'Pão do Titi', 
-        price: 27.00, 
+        price: 25.00, 
         category: 'lanche',
-        description: 'Pão artesanal, costela defumada 120g, queijo, bacon crocante, alface, cebola roxa e banana frita'
+        description: 'Pão, carne 120g, queijo, bacon, alface, cebola roxa e banana frita',
+        available: true
     },
- 'premium': { 
+    'premium': { 
         name: 'Costela Premium', 
         price: 29.90, 
         category: 'lanche',
-        description: 'Pão baguete francês, costela defumada premium 140g, queijo cheddar importado, cebola caramelizada no vinho tinto e molho barbecue artesanal'
+        description: 'Pão baguete, costela defumada 180g, queijo cheddar, cebola caramelizada e molho barbecue',
+        available: false
     },
-
     // Bebidas
-    'agua_mineral': { name: 'Água Mineral', price: 3.00, category: 'bebida' },
-    'agua_gas': { name: 'Água Mineral c/ Gás', price: 4.00, category: 'bebida' },
-    'refri_lata': { name: 'Refrigerante Lata', price: 5.00, category: 'bebida' },
-    'refri_1l': { name: 'Refrigerante 1L', price: 10.00, category: 'bebida' },
+    'agua_mineral': { name: 'Água Mineral', price: 3.00, category: 'bebida', available: true },
+    'agua_gas': { name: 'Água Mineral c/ Gás', price: 4.00, category: 'bebida', available: true },
+    'refri_lata': { name: 'Refrigerante Lata', price: 5.00, category: 'bebida', available: true },
+    'refri_1l': { name: 'Refrigerante 1L', price: 10.00, category: 'bebida', available: true },
     // Porções
-    'batata_150': { name: 'Batata Frita Pequena', price: 10.00, category: 'porcao' },
-    'batata_300': { name: 'Batata Frita Grande', price: 15.00, category: 'porcao' }
+    'batata_150': { name: 'Batata Frita 150g', price: 10.00, category: 'porcao', available: true },
+    'batata_300': { name: 'Batata Frita 300g', price: 15.00, category: 'porcao', available: true }
 };
 
 const ADDITIONALS = {
@@ -38,18 +40,16 @@ const ADDITIONALS = {
 };
 
 const CONFIG = {
-    deliveryFee: 0,
-    whatsappNumber: '5569992588282', // Número do WhatsApp
-    prepareTime: '35-40',
-    minDeliveryValue: 0,
-    deliveryText: 'A combinar'
+    deliveryFee: 5.00,
+    whatsappNumber: '5511999999999',
+    prepareTime: '15-20',
+    minDeliveryValue: 0
 };
 
 // Estado da aplicação
 let cart = {};
 let isDelivery = false;
 let currentCustomizing = null;
-let cartCount = 0;
 
 // Elementos DOM
 const elements = {
@@ -62,23 +62,14 @@ const elements = {
     modalTitle: document.getElementById('modal-title'),
     deliveryFields: document.getElementById('delivery-fields'),
     localInstructions: document.getElementById('local-instructions'),
-    addressFields: document.getElementById('address-fields'),
-    floatingCart: document.getElementById('floating-cart'),
-    cartCountBadge: document.getElementById('cart-count')
+    addressFields: document.getElementById('address-fields')
 };
 
 // Inicialização
 document.addEventListener('DOMContentLoaded', function() {
     initializeEventListeners();
     updateCartDisplay();
-    updateFloatingCartCount();
-    
-    // Animação suave ao carregar
-    document.body.style.opacity = '0';
-    setTimeout(() => {
-        document.body.style.transition = 'opacity 0.5s ease';
-        document.body.style.opacity = '1';
-    }, 100);
+    enhanceTouchExperience();
 });
 
 // Event Listeners
@@ -89,8 +80,7 @@ function initializeEventListeners() {
 
     // Botões de quantidade (bebidas e porções)
     document.querySelectorAll('.qty-btn').forEach(button => {
-        button.addEventListener('click', function(e) {
-            e.preventDefault();
+        button.addEventListener('click', function() {
             const productId = this.dataset.product;
             const action = this.dataset.action;
             updateQuantity(productId, action === 'increase' ? 1 : -1);
@@ -99,8 +89,7 @@ function initializeEventListeners() {
 
     // Botões adicionar direto (bebidas e porções)
     document.querySelectorAll('.add-to-cart').forEach(button => {
-        button.addEventListener('click', function(e) {
-            e.preventDefault();
+        button.addEventListener('click', function() {
             const productId = this.dataset.product;
             addToCartDirect(productId);
         });
@@ -108,8 +97,7 @@ function initializeEventListeners() {
 
     // Botões adicionar direto (lanches sem personalização)
     document.querySelectorAll('.add-to-cart-direct').forEach(button => {
-        button.addEventListener('click', function(e) {
-            e.preventDefault();
+        button.addEventListener('click', function() {
             const productId = this.dataset.product;
             addToCartDirect(productId);
         });
@@ -117,19 +105,14 @@ function initializeEventListeners() {
 
     // Botões personalizar (lanches)
     document.querySelectorAll('.customize-btn').forEach(button => {
-        button.addEventListener('click', function(e) {
-            e.preventDefault();
+        button.addEventListener('click', function() {
             const productId = this.dataset.product;
             openCustomizeModal(productId);
         });
     });
 
     // Modal de personalização
-    const cancelCustomizeButtons = document.querySelectorAll('#cancel-customize, #cancel-customize-2');
-    cancelCustomizeButtons.forEach(button => {
-        button.addEventListener('click', closeCustomizeModal);
-    });
-    
+    document.getElementById('cancel-customize').addEventListener('click', closeCustomizeModal);
     document.getElementById('add-customized').addEventListener('click', addCustomizedToCart);
     
     // Adicionar listeners para adicionais
@@ -140,36 +123,23 @@ function initializeEventListeners() {
     // Modal do cliente
     document.getElementById('finalizar-pedido').addEventListener('click', finalizarPedido);
     document.getElementById('buscar-cep').addEventListener('click', buscarCep);
-    
-    const cancelOrderButtons = document.querySelectorAll('#cancelar-pedido, #cancelar-pedido-2');
-    cancelOrderButtons.forEach(button => {
-        button.addEventListener('click', closeCustomerModal);
-    });
-    
+    document.getElementById('cancelar-pedido').addEventListener('click', closeCustomerModal);
     document.getElementById('enviar-whatsapp').addEventListener('click', enviarPedidoWhatsApp);
 
     // Formatação de campos
     document.getElementById('customer-cep').addEventListener('input', formatarCep);
     document.getElementById('customer-phone').addEventListener('input', formatarTelefone);
 
-    // Fechar modais clicando fora
-    elements.customizeModal.addEventListener('click', function(e) {
-        if (e.target === this) closeCustomizeModal();
-    });
-
-    elements.customerModal.addEventListener('click', function(e) {
-        if (e.target === this) closeCustomerModal();
-    });
-
-    // Scroll suave para o carrinho
-    elements.floatingCart.addEventListener('click', scrollToCart);
-}
-
-// Scroll para o carrinho
-function scrollToCart() {
-    document.getElementById('cart-section').scrollIntoView({
-        behavior: 'smooth',
-        block: 'start'
+    // Listener para tecla ESC fechar modais
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            if (elements.customizeModal.style.display === 'flex') {
+                closeCustomizeModal();
+            }
+            if (elements.customerModal.style.display === 'flex') {
+                closeCustomerModal();
+            }
+        }
     });
 }
 
@@ -181,9 +151,6 @@ function toggleDeliveryOption(delivery) {
     document.getElementById('viagem-btn').classList.toggle('active', delivery);
     
     updateCartDisplay();
-    
-    // Feedback visual
-    showFeedback(delivery ? 'Mudou para entrega' : 'Mudou para consumo no local', 'info');
 }
 
 // Atualizar quantidade
@@ -193,21 +160,17 @@ function updateQuantity(productId, change) {
     quantity += change;
     
     if (quantity < 0) quantity = 0;
-    if (quantity > 99) quantity = 99; // Limite máximo
     
     qtyElement.textContent = quantity;
-    
-    // Animação de mudança
-    qtyElement.style.transform = 'scale(1.2)';
-    setTimeout(() => {
-        qtyElement.style.transform = 'scale(1)';
-    }, 150);
 }
 
 // Adicionar ao carrinho direto (sem personalização)
 function addToCartDirect(productId) {
     const product = PRODUCTS[productId];
-    if (!product) return;
+    if (!product || !product.available) {
+        showFeedback('Este produto não está disponível no momento.', 'error');
+        return;
+    }
 
     // Para bebidas e porções, usar a quantidade selecionada
     let quantity = 1;
@@ -215,13 +178,7 @@ function addToCartDirect(productId) {
     if (qtyElement) {
         quantity = parseInt(qtyElement.textContent);
         if (quantity <= 0) {
-            showFeedback('Selecione uma quantidade antes de adicionar.', 'warning');
-            // Highlight do campo quantidade
-            const quantityDiv = qtyElement.closest('.quantity');
-            quantityDiv.style.animation = 'shake 0.5s ease';
-            setTimeout(() => {
-                quantityDiv.style.animation = '';
-            }, 500);
+            showFeedback('Selecione uma quantidade antes de adicionar.', 'error');
             return;
         }
         qtyElement.textContent = '0'; // Resetar
@@ -235,7 +192,7 @@ function addItemToCart(productId, quantity = 1, additionals = [], notes = '') {
     const product = PRODUCTS[productId];
     if (!product) return;
 
-    const itemId = generateItemId(productId, additionals, notes);
+    const itemId = generateItemId(productId, additionals);
     
     if (cart[itemId]) {
         cart[itemId].quantity += quantity;
@@ -266,29 +223,22 @@ function addItemToCart(productId, quantity = 1, additionals = [], notes = '') {
     }
     
     updateCartDisplay();
-    updateFloatingCartCount();
-    updateCartProgress();
-    
     showFeedback(`${product.name} adicionado ao carrinho!`, 'success');
-    
-    // Animação do carrinho flutuante
-    elements.floatingCart.style.animation = 'bounce 0.6s ease';
-    setTimeout(() => {
-        elements.floatingCart.style.animation = '';
-    }, 600);
 }
 
-// Gerar ID único para item (considerando adicionais e observações)
-function generateItemId(productId, additionals = [], notes = '') {
+// Gerar ID único para item (considerando adicionais)
+function generateItemId(productId, additionals = []) {
     const additionalsStr = additionals.sort().join(',');
-    const notesStr = notes.trim().toLowerCase();
-    return `${productId}_${additionalsStr}_${btoa(notesStr).replace(/[^a-zA-Z0-9]/g, '')}`;
+    return `${productId}_${additionalsStr}`;
 }
 
 // Abrir modal de personalização
 function openCustomizeModal(productId) {
     const product = PRODUCTS[productId];
-    if (!product) return;
+    if (!product || !product.available) {
+        showFeedback('Este produto não está disponível no momento.', 'error');
+        return;
+    }
 
     currentCustomizing = productId;
     
@@ -299,7 +249,7 @@ function openCustomizeModal(productId) {
     document.getElementById('base-product-info').innerHTML = `
         <div class="base-product-name">${product.name}</div>
         <div class="base-product-price">R$ ${product.price.toFixed(2)}</div>
-        <div style="font-size: 13px; color: #666; margin-top: 8px; line-height: 1.4;">${product.description}</div>
+        <div style="font-size: 12px; color: #666; margin-top: 5px;">${product.description}</div>
     `;
     
     // Limpar seleções anteriores
@@ -310,11 +260,6 @@ function openCustomizeModal(productId) {
     
     updateCustomizeTotal();
     elements.customizeModal.style.display = 'flex';
-    
-    // Focar no modal
-    setTimeout(() => {
-        document.getElementById('item-notes').focus();
-    }, 300);
 }
 
 // Fechar modal de personalização
@@ -352,38 +297,6 @@ function addCustomizedToCart() {
     closeCustomizeModal();
 }
 
-// Atualizar contador do carrinho flutuante
-function updateFloatingCartCount() {
-    cartCount = 0;
-    for (const itemId in cart) {
-        cartCount += cart[itemId].quantity;
-    }
-    
-    elements.cartCountBadge.textContent = cartCount;
-    elements.cartCountBadge.style.display = cartCount > 0 ? 'flex' : 'none';
-    
-    // Animação quando adiciona item
-    if (cartCount > 0) {
-        elements.cartCountBadge.style.animation = 'bounce 0.3s ease';
-        setTimeout(() => {
-            elements.cartCountBadge.style.animation = '';
-        }, 300);
-    }
-}
-
-// Atualizar progresso do carrinho
-function updateCartProgress() {
-    const steps = document.querySelectorAll('.progress-step');
-    const hasItems = Object.keys(cart).length > 0;
-    
-    // Step 1: Escolher (sempre ativo se tem itens)
-    steps[0].classList.toggle('active', hasItems);
-    
-    // Steps 2 e 3 ficam inativos até o processo de finalização
-    steps[1].classList.remove('active');
-    steps[2].classList.remove('active');
-}
-
 // Atualizar exibição do carrinho
 function updateCartDisplay() {
     elements.cartItems.innerHTML = '';
@@ -392,13 +305,7 @@ function updateCartDisplay() {
     const itemCount = Object.keys(cart).length;
     
     if (itemCount === 0) {
-        elements.cartItems.innerHTML = `
-            <div class="empty-cart">
-                <i class="fas fa-shopping-cart"></i>
-                <h3>Seu carrinho está vazio</h3>
-                <p>Adicione alguns itens deliciosos para começar!</p>
-            </div>
-        `;
+        elements.cartItems.innerHTML = '<div class="empty-cart">Seu carrinho está vazio</div>';
         elements.deliveryFeeContainer.style.display = 'none';
         elements.cartTotal.textContent = 'R$ 0,00';
         return;
@@ -418,13 +325,22 @@ function updateCartDisplay() {
     let total = subtotal;
     if (isDelivery && subtotal > 0) {
         elements.deliveryFeeContainer.style.display = 'block';
-        elements.deliveryFeeValue.textContent = CONFIG.deliveryText;
-        // Não adiciona taxa pois é "a combinar"
+        elements.deliveryFeeValue.textContent = `R$ ${CONFIG.deliveryFee.toFixed(2)}`;
+        total += CONFIG.deliveryFee;
     } else {
         elements.deliveryFeeContainer.style.display = 'none';
     }
     
     elements.cartTotal.textContent = `R$ ${total.toFixed(2)}`;
+    
+    // Adicionar event listeners aos botões de quantidade do carrinho
+    document.querySelectorAll('.cart-qty-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const itemId = this.dataset.item;
+            const action = this.dataset.action;
+            changeCartItemQuantity(itemId, action === 'increase' ? 1 : -1);
+        });
+    });
 }
 
 // Criar elemento do item do carrinho
@@ -450,21 +366,12 @@ function createCartItemElement(itemId, item, itemTotal) {
             <div class="cart-item-price">R$ ${item.totalPrice.toFixed(2)} cada</div>
         </div>
         <div class="cart-item-quantity">
-            <button class="cart-qty-btn" data-item="${itemId}" data-action="decrease">-</button>
+            <button class="qty-btn cart-qty-btn" data-item="${itemId}" data-action="decrease">-</button>
             <span>${item.quantity}</span>
-            <button class="cart-qty-btn" data-item="${itemId}" data-action="increase">+</button>
+            <button class="qty-btn cart-qty-btn" data-item="${itemId}" data-action="increase">+</button>
         </div>
         <div class="cart-item-total">R$ ${itemTotal.toFixed(2)}</div>
     `;
-    
-    // Adicionar event listeners aos botões de quantidade
-    cartItem.querySelectorAll('.cart-qty-btn').forEach(button => {
-        button.addEventListener('click', function() {
-            const itemId = this.dataset.item;
-            const action = this.dataset.action;
-            changeCartItemQuantity(itemId, action === 'increase' ? 1 : -1);
-        });
-    });
     
     return cartItem;
 }
@@ -476,19 +383,16 @@ function changeCartItemQuantity(itemId, change) {
         
         if (cart[itemId].quantity <= 0) {
             delete cart[itemId];
-            showFeedback('Item removido do carrinho', 'info');
         }
         
         updateCartDisplay();
-        updateFloatingCartCount();
-        updateCartProgress();
     }
 }
 
 // Finalizar pedido
 function finalizarPedido() {
     if (Object.keys(cart).length === 0) {
-        showFeedback('Adicione itens ao carrinho antes de finalizar o pedido.', 'warning');
+        showFeedback('Adicione itens ao carrinho antes de finalizar o pedido.', 'error');
         return;
     }
     
@@ -497,38 +401,22 @@ function finalizarPedido() {
 
 // Abrir modal do cliente
 function openCustomerModal() {
-    // Atualizar progresso
-    const steps = document.querySelectorAll('.progress-step');
-    steps[0].classList.add('active');
-    steps[1].classList.add('active');
-    steps[2].classList.remove('active');
-    
     if (isDelivery) {
         elements.modalTitle.textContent = 'Informações para Entrega';
         elements.deliveryFields.style.display = 'block';
         elements.localInstructions.style.display = 'none';
     } else {
-        elements.modalTitle.textContent = 'Informações para Retirada no Local';
+        elements.modalTitle.textContent = 'Informações para Consumo no Local';
         elements.deliveryFields.style.display = 'none';
         elements.localInstructions.style.display = 'block';
     }
     
     elements.customerModal.style.display = 'flex';
-    
-    // Focar no primeiro campo
-    setTimeout(() => {
-        document.getElementById('customer-name').focus();
-    }, 300);
 }
 
 // Fechar modal do cliente
 function closeCustomerModal() {
     elements.customerModal.style.display = 'none';
-    
-    // Voltar progresso
-    const steps = document.querySelectorAll('.progress-step');
-    steps[1].classList.remove('active');
-    steps[2].classList.remove('active');
 }
 
 // Buscar CEP
@@ -541,15 +429,14 @@ function buscarCep() {
     }
     
     const cepButton = document.getElementById('buscar-cep');
-    const originalContent = cepButton.innerHTML;
-    cepButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Buscando...';
+    cepButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
     cepButton.disabled = true;
     
     fetch(`https://viacep.com.br/ws/${cep}/json/`)
         .then(response => response.json())
         .then(data => {
             if (data.erro) {
-                showFeedback('CEP não encontrado. Preencha o endereço manualmente.', 'warning');
+                showFeedback('CEP não encontrado. Preencha o endereço manualmente.', 'error');
                 elements.addressFields.style.display = 'block';
             } else {
                 document.getElementById('customer-address').value = data.logradouro || '';
@@ -559,8 +446,6 @@ function buscarCep() {
                 
                 elements.addressFields.style.display = 'block';
                 document.getElementById('customer-number').focus();
-                
-                showFeedback('Endereço encontrado!', 'success');
             }
         })
         .catch(error => {
@@ -569,7 +454,7 @@ function buscarCep() {
             elements.addressFields.style.display = 'block';
         })
         .finally(() => {
-            cepButton.innerHTML = originalContent;
+            cepButton.innerHTML = '<i class="fas fa-search"></i>';
             cepButton.disabled = false;
         });
 }
@@ -587,14 +472,12 @@ function formatarCep(e) {
 function formatarTelefone(e) {
     let value = e.target.value.replace(/\D/g, '');
     if (value.length > 0) {
-        if (value.length <= 2) {
-            value = '(' + value;
-        } else if (value.length <= 7) {
-            value = '(' + value.substring(0, 2) + ') ' + value.substring(2);
-        } else if (value.length <= 11) {
-            value = '(' + value.substring(0, 2) + ') ' + value.substring(2, 7) + '-' + value.substring(7);
-        } else {
-            value = '(' + value.substring(0, 2) + ') ' + value.substring(2, 7) + '-' + value.substring(7, 11);
+        value = '(' + value;
+        if (value.length > 3) {
+            value = value.substring(0, 3) + ') ' + value.substring(3);
+        }
+        if (value.length > 10) {
+            value = value.substring(0, 10) + '-' + value.substring(10, 14);
         }
     }
     e.target.value = value;
@@ -611,45 +494,17 @@ function enviarPedidoWhatsApp() {
         return;
     }
     
-    if (!isValidName(name)) {
-        showFeedback('Digite um nome válido com pelo menos 2 caracteres.', 'error');
-        document.getElementById('customer-name').focus();
-        return;
-    }
-    
-    if (!isValidPhone(phone)) {
-        showFeedback('Digite um telefone válido.', 'error');
-        document.getElementById('customer-phone').focus();
-        return;
-    }
-    
     if (!validateForm()) return;
     
-    // Atualizar progresso final
-    const steps = document.querySelectorAll('.progress-step');
-    steps[2].classList.add('active');
+    const message = buildWhatsAppMessage(name, phone, notes);
     
-    const button = document.getElementById('enviar-whatsapp');
-    const originalContent = button.innerHTML;
-    button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando...';
-    button.disabled = true;
+    // Enviar para WhatsApp
+    window.open(`https://wa.me/${CONFIG.whatsappNumber}?text=${encodeURIComponent(message)}`, '_blank');
     
-    setTimeout(() => {
-        const message = buildWhatsAppMessage(name, phone, notes);
-        
-        // Enviar para WhatsApp
-        window.open(`https://wa.me/${CONFIG.whatsappNumber}?text=${message}`, '_blank');
-        
-        // Limpar e fechar
-        setTimeout(() => {
-            clearFormAndCart();
-            closeCustomerModal();
-            showFeedback('Pedido enviado com sucesso! Aguarde nosso contato.', 'success');
-        }, 1000);
-        
-        button.innerHTML = originalContent;
-        button.disabled = false;
-    }, 1500);
+    // Limpar e fechar
+    clearFormAndCart();
+    closeCustomerModal();
+    showFeedback('Pedido enviado com sucesso!', 'success');
 }
 
 // Validar formulário
@@ -671,14 +526,11 @@ function validateForm() {
 
 // Construir mensagem do WhatsApp
 function buildWhatsAppMessage(name, phone, notes) {
-    const orderType = isDelivery ? 'Delivery' : 'Retirada no Local';
-    const timestamp = new Date().toLocaleString('pt-BR');
-    
-    let message = `*🍔 NOVO PEDIDO - Costela do Titi*%0A%0A`;
-    message += `*📅 Data/Hora:* ${timestamp}%0A`;
-    message += `*👤 Cliente:* ${name}%0A`;
-    message += `*📱 Telefone:* ${phone}%0A`;
-    message += `*📍 Tipo:* ${orderType}%0A%0A`;
+    const orderType = isDelivery ? 'Delivery' : 'Retirada';
+    let message = `*NOVO PEDIDO - Costela do Titi*\n\n`;
+    message += `*Cliente:* ${name}\n`;
+    message += `*Telefone:* ${phone}\n`;
+    message += `*Tipo:* ${orderType}\n\n`;
     
     // Endereço para delivery
     if (isDelivery) {
@@ -689,14 +541,13 @@ function buildWhatsAppMessage(name, phone, notes) {
         const city = document.getElementById('customer-city').value.trim();
         const state = document.getElementById('customer-state').value.trim();
         
-        message += `*🏠 ENDEREÇO DE ENTREGA:*%0A`;
-        message += `${address}, ${number}`;
+        message += `*Endereço:* ${address}, ${number}`;
         if (complement) message += `, ${complement}`;
-        message += `%0A${neighborhood} - ${city}/${state}%0A%0A`;
+        message += ` - ${neighborhood}, ${city}-${state}\n\n`;
     }
     
     // Itens do pedido por categoria
-    message += `*🛒 ITENS DO PEDIDO:*%0A%0A`;
+    message += `*ITENS DO PEDIDO:*\n\n`;
     
     const categories = {
         'lanche': '🍔 *LANCHES*',
@@ -721,7 +572,7 @@ function buildWhatsAppMessage(name, phone, notes) {
     // Exibir itens por categoria
     Object.keys(itemsByCategory).forEach(category => {
         if (categories[category]) {
-            message += `${categories[category]}%0A`;
+            message += `${categories[category]}\n`;
         }
         
         itemsByCategory[category].forEach(item => {
@@ -737,54 +588,47 @@ function buildWhatsAppMessage(name, phone, notes) {
             message += ` - R$ ${itemTotal.toFixed(2)}`;
             
             if (item.notes) {
-                message += `%0A  _💬 Obs: ${item.notes}_`;
+                message += `\n  _Obs: ${item.notes}_`;
             }
             
-            message += `%0A`;
+            message += `\n`;
         });
         
-        message += `%0A`;
+        message += `\n`;
     });
     
     // Taxa de entrega
     if (isDelivery) {
-        message += `🚚 *Taxa de entrega:* ${CONFIG.deliveryText}%0A%0A`;
+        message += `📦 *Taxa de entrega:* R$ ${CONFIG.deliveryFee.toFixed(2)}\n\n`;
     }
     
     // Total
-    message += `💰 *SUBTOTAL: R$ ${subtotal.toFixed(2)}*%0A`;
-    if (isDelivery) {
-        message += `💰 *TOTAL: R$ ${subtotal.toFixed(2)} + taxa de entrega a combinar*%0A%0A`;
-    } else {
-        message += `💰 *TOTAL: R$ ${subtotal.toFixed(2)}*%0A%0A`;
-    }
+    const total = isDelivery ? subtotal + CONFIG.deliveryFee : subtotal;
+    message += `💰 *TOTAL: R$ ${total.toFixed(2)}*\n\n`;
     
     // Observações gerais
     if (notes) {
-        message += `📝 *OBSERVAÇÕES:* ${notes}%0A%0A`;
+        message += `📝 *Observações:* ${notes}\n\n`;
     }
     
     // Instruções finais
     if (isDelivery) {
-        message += `🚚 *DELIVERY*%0A`;
-        message += `⏱️ Tempo estimado: ${CONFIG.prepareTime} minutos%0A`;
-        message += `📞 Entraremos em contato para confirmar o pedido e combinar a taxa de entrega!%0A%0A`;
+        message += `🚚 *Delivery* - Tempo estimado: 30-45 minutos\n`;
+        message += `Entraremos em contato para confirmar o pedido!\n\n`;
     } else {
-        message += `🏪 *RETIRADA NO LOCAL*%0A`;
-        message += `⏱️ Tempo estimado: ${CONFIG.prepareTime} minutos%0A`;
-        message += `📞 Avisaremos quando estiver pronto para retirada!%0A%0A`;
+        message += `🏪 *Retirada no Local* - Tempo estimado: ${CONFIG.prepareTime} minutos\n`;
+        message += `Avisaremos quando estiver pronto para retirada!\n\n`;
     }
     
-    message += `🌐 _Pedido realizado via site_`;
+    message += `_Pedido realizado via site_`;
     
-    return encodeURIComponent(message);
+    return message;
 }
 
 // Limpar formulário e carrinho
 function clearFormAndCart() {
     // Limpar carrinho
     cart = {};
-    cartCount = 0;
     
     // Limpar formulário
     document.getElementById('customer-name').value = '';
@@ -806,10 +650,8 @@ function clearFormAndCart() {
     // Esconder campos de endereço
     elements.addressFields.style.display = 'none';
     
-    // Atualizar displays
+    // Atualizar display do carrinho
     updateCartDisplay();
-    updateFloatingCartCount();
-    updateCartProgress();
 }
 
 // Mostrar feedback para o usuário
@@ -823,24 +665,19 @@ function showFeedback(message, type = 'info') {
     // Criar novo feedback
     const feedback = document.createElement('div');
     feedback.className = `feedback-message feedback-${type}`;
-    
-    const icon = type === 'success' ? 'fa-check-circle' : 
-                 type === 'error' ? 'fa-exclamation-circle' :
-                 type === 'warning' ? 'fa-exclamation-triangle' : 'fa-info-circle';
-    
     feedback.innerHTML = `
-        <i class="fas ${icon}"></i>
+        <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-info-circle'}"></i>
         <span>${message}</span>
     `;
     
     document.body.appendChild(feedback);
     
-    // Mostrar feedback
-    requestAnimationFrame(() => {
+    // Animação de entrada
+    setTimeout(() => {
         feedback.classList.add('show');
-    });
+    }, 10);
     
-    // Remover após 4 segundos
+    // Remover após 3 segundos
     setTimeout(() => {
         feedback.classList.remove('show');
         setTimeout(() => {
@@ -848,20 +685,59 @@ function showFeedback(message, type = 'info') {
                 feedback.remove();
             }
         }, 300);
-    }, 4000);
+    }, 3000);
 }
 
-// Função para debounce
-function debounce(func, wait) {
-    let timeout;
-    return function executedFunction(...args) {
-        const later = () => {
-            clearTimeout(timeout);
-            func(...args);
-        };
-        clearTimeout(timeout);
-        timeout = setTimeout(later, wait);
-    };
+// Melhorar experiência de toque para dispositivos móveis
+function enhanceTouchExperience() {
+    // Aumentar a área de toque para todos os botões
+    document.querySelectorAll('button').forEach(button => {
+        button.style.minHeight = '44px';
+        button.style.minWidth = '44px';
+        button.style.display = 'flex';
+        button.style.alignItems = 'center';
+        button.style.justifyContent = 'center';
+    });
+    
+    // Prevenir zoom em inputs ao focar (em alguns dispositivos)
+    document.querySelectorAll('input, select, textarea').forEach(input => {
+        input.addEventListener('focus', () => {
+            document.querySelector('meta[name="viewport"]')
+                .setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no');
+        });
+        
+        input.addEventListener('blur', () => {
+            document.querySelector('meta[name="viewport"]')
+                .setAttribute('content', 'width=device-width, initial-scale=1.0');
+        });
+    });
+}
+
+// Inicializar validação de formulário
+function initFormValidation() {
+    // Validação de nome
+    const nameInput = document.getElementById('customer-name');
+    if (nameInput) {
+        nameInput.addEventListener('blur', function() {
+            if (!isValidName(this.value)) {
+                this.style.borderColor = '#dc3545';
+            } else {
+                this.style.borderColor = '#28a745';
+            }
+        });
+    }
+    
+    // Validação de telefone
+    const phoneInput = document.getElementById('customer-phone');
+    if (phoneInput) {
+        phoneInput.addEventListener('blur', function() {
+            if (!isValidPhone(this.value)) {
+                this.style.borderColor = '#dc3545';
+            } else {
+                this.style.borderColor = '#28a745';
+            }
+        });
+    }
 }
 
 // Função para validar telefone
@@ -872,71 +748,13 @@ function isValidPhone(phone) {
 
 // Função para validar nome
 function isValidName(name) {
-    return name.trim().length >= 2 && /^[a-zA-ZÀ-ÿ\s]+$/.test(name.trim());
+    return name.trim().length >= 2;
 }
 
-// Validação em tempo real
-document.addEventListener('DOMContentLoaded', function() {
-    // Validação de nome
-    const nameInput = document.getElementById('customer-name');
-    if (nameInput) {
-        nameInput.addEventListener('blur', function() {
-            if (this.value && !isValidName(this.value)) {
-                this.style.borderColor = '#dc3545';
-                showFeedback('Nome deve ter pelo menos 2 caracteres e conter apenas letras', 'error');
-            } else if (this.value) {
-                this.style.borderColor = '#28a745';
-            } else {
-                this.style.borderColor = '#e0e0e0';
-            }
-        });
-    }
-    
-    // Validação de telefone
-    const phoneInput = document.getElementById('customer-phone');
-    if (phoneInput) {
-        phoneInput.addEventListener('blur', function() {
-            if (this.value && !isValidPhone(this.value)) {
-                this.style.borderColor = '#dc3545';
-                showFeedback('Digite um telefone válido', 'error');
-            } else if (this.value) {
-                this.style.borderColor = '#28a745';
-            } else {
-                this.style.borderColor = '#e0e0e0';
-            }
-        });
-    }
-});
+// Inicializar validação de formulário quando o DOM estiver carregado
+document.addEventListener('DOMContentLoaded', initFormValidation);
 
-// Listener para tecla ESC fechar modais
-document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') {
-        if (elements.customizeModal.style.display === 'flex') {
-            closeCustomizeModal();
-        }
-        if (elements.customerModal.style.display === 'flex') {
-            closeCustomerModal();
-        }
-    }
-});
-
-// Adicionar animação CSS personalizada para shake
-const style = document.createElement('style');
-style.textContent = `
-    @keyframes shake {
-        0%, 100% { transform: translateX(0); }
-        25% { transform: translateX(-5px); }
-        75% { transform: translateX(5px); }
-    }
-    
-    .feedback-message {
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-`;
-document.head.appendChild(style);
-
-// Console log para debugging (remover em produção)
-console.log('🍔 Sistema Costela do Titi carregado com sucesso!');
-console.log(`📦 Produtos disponíveis: ${Object.keys(PRODUCTS).length}`);
-console.log(`➕ Adicionais disponíveis: ${Object.keys(ADDITIONALS).length}`);
-console.log(`📱 WhatsApp configurado: ${CONFIG.whatsappNumber}`);
+// Console log para debugging
+if (typeof console !== 'undefined') {
+    console.log('Sistema Costela do Titi carregado com sucesso!');
+}
