@@ -5,14 +5,14 @@ const PRODUCTS = {
         name: 'Pão da Casa', 
         price: 20.00, 
         category: 'lanche',
-        description: 'Pão, carne 120g, queijo, alface e banana frita',
+        description: 'Pão, costela desfiada 150g, queijo, alface e banana frita',
         available: true
     },
     'titi': { 
         name: 'Pão do Titi', 
-        price: 25.00, 
+        price: 27.00, 
         category: 'lanche',
-        description: 'Pão, carne 120g, queijo, bacon, alface, cebola roxa e banana frita',
+        description: 'Pão, costela desfiada 150g, queijo mussarela, bacon, alface, cebola roxa e banana frita',
         available: true
     },
     'premium': { 
@@ -41,7 +41,7 @@ const ADDITIONALS = {
 
 const CONFIG = {
     deliveryFee: 5.00,
-    whatsappNumber: '5511999999999',
+    whatsappNumber: '5569992588282',
     prepareTime: '15-20',
     minDeliveryValue: 0
 };
