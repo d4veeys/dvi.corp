@@ -419,6 +419,12 @@ header {
     padding: 10px 0;
     border-top: 1px dashed #eee;
     color: #666;
+    font-style: italic;
+}
+
+.delivery-fee span:last-child {
+    color: var(--primary);
+    font-weight: 600;
 }
 
 .cart-total {

@@ -5,19 +5,19 @@ const PRODUCTS = {
         name: 'Pão da Casa', 
         price: 20.00, 
         category: 'lanche',
-        description: 'Pão, 120g de costela defumada, queijo, alface e banana frita'
+        description: 'Pão, carne 120g, queijo, alface e banana frita'
     },
     'titi': { 
         name: 'Pão do Titi', 
-        price: 27.00, 
+        price: 25.00, 
         category: 'lanche',
-        description: 'Pão, 150g de costela defumada, queijo mmussarela, bacon, alface, cebola roxa e banana frita'
+        description: 'Pão, carne 120g, queijo, bacon, alface, cebola roxa e banana frita'
     },
     'premium': { 
-        name: 'Cupim Premium', 
+        name: 'Costela Premium', 
         price: 29.90, 
         category: 'lanche',
-        description: 'Pão baguete, cupim defumado 150g, queijo cheddar, cebola caramelizada e molho barbecue'
+        description: 'Pão baguete, costela defumada 180g, queijo cheddar, cebola caramelizada e molho barbecue'
     },
     // Bebidas
     'agua_mineral': { name: 'Água Mineral', price: 3.00, category: 'bebida' },
@@ -37,9 +37,9 @@ const ADDITIONALS = {
 };
 
 const CONFIG = {
-    deliveryFee: 'A combinar',
-    whatsappNumber: '5569992588282', 
-    prepareTime: '25-40',
+    deliveryFee: 5.00,
+    whatsappNumber: '5511999999999', // Substitua pelo número real
+    prepareTime: '15-20',
     minDeliveryValue: 0 // Valor mínimo para delivery
 };
 
@@ -746,7 +746,8 @@ function getCartSummary() {
         itemCount: 0,
         totalItems: 0,
         subtotal: 0,
-        deliveryFee: isDelivery ? CONFIG.deliveryFee : 0,
+        deliveryFee: 0, // Sempre 0 quando é "a combinar"
+        deliveryText: isDelivery ? CONFIG.deliveryText : '',
         total: 0
     };
     
@@ -757,7 +758,8 @@ function getCartSummary() {
         summary.subtotal += item.totalPrice * item.quantity;
     }
     
-    summary.total = summary.subtotal + summary.deliveryFee;
+    // Total é apenas o subtotal quando entrega é "a combinar"
+    summary.total = summary.subtotal;
     
     return summary;
 }
