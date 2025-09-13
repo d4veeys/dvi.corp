@@ -1303,4 +1303,12 @@ html {
     .menu-item {
         padding: 5px;
     }
+    
+    /* Adicione ao final do seu arquivo CSS */
+
+.delivery-fee span:last-child {
+    color: var(--primary);
+    font-weight: 600;
+    font-style: italic;
+}
 }

@@ -5,14 +5,14 @@ const PRODUCTS = {
         name: 'Pão da Casa', 
         price: 20.00, 
         category: 'lanche',
-        description: 'Pão, costela desfiada 150g, queijo, alface e banana frita',
+        description: 'Pão, carne 120g, queijo, alface e banana frita',
         available: true
     },
     'titi': { 
         name: 'Pão do Titi', 
-        price: 27.00, 
+        price: 25.00, 
         category: 'lanche',
-        description: 'Pão, costela desfiada 150g, queijo mussarela, bacon, alface, cebola roxa e banana frita',
+        description: 'Pão, carne 120g, queijo, bacon, alface, cebola roxa e banana frita',
         available: true
     },
     'premium': { 
@@ -40,8 +40,8 @@ const ADDITIONALS = {
 };
 
 const CONFIG = {
-    deliveryFee: 5.00,
-    whatsappNumber: '5569992588282',
+    deliveryText: "A combinar", // Alterado para texto em vez de valor fixo
+    whatsappNumber: '5511999999999',
     prepareTime: '15-20',
     minDeliveryValue: 0
 };
@@ -321,12 +321,13 @@ function updateCartDisplay() {
         elements.cartItems.appendChild(cartItemElement);
     }
     
-    // Calcular total com taxa de entrega
+    // Calcular total - SEM adicionar taxa de entrega
     let total = subtotal;
+    
+    // Mostrar apenas a mensagem "Entrega a combinar" para delivery
     if (isDelivery && subtotal > 0) {
         elements.deliveryFeeContainer.style.display = 'block';
-        elements.deliveryFeeValue.textContent = `R$ ${CONFIG.deliveryFee.toFixed(2)}`;
-        total += CONFIG.deliveryFee;
+        elements.deliveryFeeValue.textContent = CONFIG.deliveryText;
     } else {
         elements.deliveryFeeContainer.style.display = 'none';
     }
@@ -597,14 +598,13 @@ function buildWhatsAppMessage(name, phone, notes) {
         message += `\n`;
     });
     
-    // Taxa de entrega
+    // Taxa de entrega - agora mostra "a combinar"
     if (isDelivery) {
-        message += `📦 *Taxa de entrega:* R$ ${CONFIG.deliveryFee.toFixed(2)}\n\n`;
+        message += `📦 *Taxa de entrega:* ${CONFIG.deliveryText}\n\n`;
     }
     
-    // Total
-    const total = isDelivery ? subtotal + CONFIG.deliveryFee : subtotal;
-    message += `💰 *TOTAL: R$ ${total.toFixed(2)}*\n\n`;
+    // Total - apenas o valor dos produtos
+    message += `💰 *TOTAL: R$ ${subtotal.toFixed(2)}*\n\n`;
     
     // Observações gerais
     if (notes) {
@@ -613,8 +613,8 @@ function buildWhatsAppMessage(name, phone, notes) {
     
     // Instruções finais
     if (isDelivery) {
-        message += `🚚 *Delivery* - Tempo estimado: 30-45 minutos\n`;
-        message += `Entraremos em contato para confirmar o pedido!\n\n`;
+        message += `🚚 *Delivery* - Entrega a combinar\n`;
+        message += `Entraremos em contato para combinar valor e tempo de entrega!\n\n`;
     } else {
         message += `🏪 *Retirada no Local* - Tempo estimado: ${CONFIG.prepareTime} minutos\n`;
         message += `Avisaremos quando estiver pronto para retirada!\n\n`;
