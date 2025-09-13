@@ -9,16 +9,17 @@ const PRODUCTS = {
     },
     'titi': { 
         name: 'Pão do Titi', 
-        price: 25.00, 
+        price: 27.00, 
         category: 'lanche',
         description: 'Pão artesanal, costela defumada 120g, queijo, bacon crocante, alface, cebola roxa e banana frita'
     },
-    'premium': { 
+/* 'premium': { 
         name: 'Costela Premium', 
         price: 29.90, 
         category: 'lanche',
         description: 'Pão baguete francês, costela defumada premium 140g, queijo cheddar importado, cebola caramelizada no vinho tinto e molho barbecue artesanal'
     },
+*/
     // Bebidas
     'agua_mineral': { name: 'Água Mineral', price: 3.00, category: 'bebida' },
     'agua_gas': { name: 'Água Mineral c/ Gás', price: 4.00, category: 'bebida' },
@@ -507,7 +508,7 @@ function openCustomerModal() {
         elements.deliveryFields.style.display = 'block';
         elements.localInstructions.style.display = 'none';
     } else {
-        elements.modalTitle.textContent = 'Informações para Consumo no Local';
+        elements.modalTitle.textContent = 'Informações para Retirada no Local';
         elements.deliveryFields.style.display = 'none';
         elements.localInstructions.style.display = 'block';
     }

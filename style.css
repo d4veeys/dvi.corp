@@ -1440,18 +1440,41 @@ html {
 }
 
 @media (max-width: 768px) {
+    .container {
+        width: 95%;
+        padding: 0 15px;
+    }
+    
     .header-content {
         flex-direction: column;
-        gap: 20px;
+        gap: 15px;
+        padding: 10px 0;
+    }
+    
+    .logo-icon {
+        font-size: 24px;
+    }
+    
+    .logo-text {
+        font-size: 18px;
     }
     
     .delivery-option {
         width: 100%;
+        max-width: 300px;
         justify-content: center;
+    }
+    
+    .delivery-btn {
+        flex: 1;
+        justify-content: center;
+        padding: 10px 12px;
+        font-size: 12px;
     }
     
     .hero {
         height: 300px;
+        padding: 20px;
     }
     
     .hero-stats {
@@ -1462,6 +1485,7 @@ html {
     
     .stat-item {
         padding: 8px 15px;
+        font-size: 13px;
     }
     
     .menu-items {
@@ -1549,29 +1573,99 @@ html {
         top: auto;
         transform: none;
     }
-}
-
-@media (max-width: 480px) {
-    .container {
-        width: 95%;
+    
+    /* Melhorias específicas para modal mobile */
+    .modal {
+        padding: 10px;
+        align-items: flex-start;
+        padding-top: 20px;
     }
     
     .modal-content {
-        width: 98%;
-        margin: 10px;
+        margin-top: 0;
+        width: 100%;
+        max-width: none;
+        border-radius: 15px;
     }
     
-    .modal-header,
+    .modal-header {
+        padding: 25px 20px 15px;
+        text-align: center;
+    }
+    
+    .modal-title {
+        font-size: 20px;
+    }
+    
     .customize-section {
-        padding: 20px 15px;
+        padding: 15px 20px;
     }
     
     .form-buttons {
-        padding: 20px 15px;
+        padding: 20px;
+    }
+}
+
+@media (max-width: 480px) {
+    header {
+        padding: 10px 0;
+    }
+    
+    .container {
+        width: 98%;
+        padding: 0 10px;
+    }
+    
+    .header-content {
+        gap: 10px;
+    }
+    
+    .logo-icon {
+        font-size: 22px;
+    }
+    
+    .logo-text {
+        font-size: 16px;
+    }
+    
+    .delivery-btn {
+        padding: 8px 10px;
+        font-size: 11px;
+    }
+    
+    .delivery-btn i {
+        font-size: 12px;
+    }
+    
+    .modal {
+        padding: 5px;
+        padding-top: 10px;
+    }
+    
+    .modal-content {
+        border-radius: 12px;
+        max-height: calc(100vh - 20px);
+    }
+    
+    .modal-header {
+        padding: 20px 15px 10px;
+    }
+    
+    .modal-title {
+        font-size: 18px;
+    }
+    
+    .customize-section {
+        padding: 15px;
+    }
+    
+    .form-buttons {
+        padding: 15px;
+        gap: 10px;
     }
     
     .cart-container {
-        padding: 25px 15px;
+        padding: 20px 15px;
     }
     
     .section-title {
@@ -1587,7 +1681,7 @@ html {
     }
     
     .hero-content h1 {
-        font-size: 32px;
+        font-size: 28px;
     }
     
     .hero-content p {
@@ -1599,8 +1693,24 @@ html {
     }
     
     .customize-total {
-        margin: 20px 15px;
+        margin: 15px;
         padding: 15px;
         font-size: 18px;
+    }
+    
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        padding: 12px;
+    }
+    
+    .form-group label {
+        font-size: 14px;
+    }
+    
+    .cancel-btn,
+    .confirm-btn {
+        padding: 12px 20px;
+        font-size: 14px;
     }
 }
