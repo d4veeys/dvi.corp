@@ -5,31 +5,28 @@ const PRODUCTS = {
         name: 'Pão da Casa', 
         price: 20.00, 
         category: 'lanche',
-        description: 'Pão, carne 120g, queijo, alface e banana frita',
-        available: true
+        description: 'Pão, carne 120g, queijo, alface e banana frita'
     },
     'titi': { 
         name: 'Pão do Titi', 
         price: 25.00, 
         category: 'lanche',
-        description: 'Pão, carne 120g, queijo, bacon, alface, cebola roxa e banana frita',
-        available: true
+        description: 'Pão, carne 120g, queijo, bacon, alface, cebola roxa e banana frita'
     },
     'premium': { 
         name: 'Costela Premium', 
         price: 29.90, 
         category: 'lanche',
-        description: 'Pão baguete, costela defumada 180g, queijo cheddar, cebola caramelizada e molho barbecue',
-        available: false
+        description: 'Pão baguete, costela defumada 180g, queijo cheddar, cebola caramelizada e molho barbecue'
     },
     // Bebidas
-    'agua_mineral': { name: 'Água Mineral', price: 3.00, category: 'bebida', available: true },
-    'agua_gas': { name: 'Água Mineral c/ Gás', price: 4.00, category: 'bebida', available: true },
-    'refri_lata': { name: 'Refrigerante Lata', price: 5.00, category: 'bebida', available: true },
-    'refri_1l': { name: 'Refrigerante 1L', price: 10.00, category: 'bebida', available: true },
+    'agua_mineral': { name: 'Água Mineral', price: 3.00, category: 'bebida' },
+    'agua_gas': { name: 'Água Mineral c/ Gás', price: 4.00, category: 'bebida' },
+    'refri_lata': { name: 'Refrigerante Lata', price: 5.00, category: 'bebida' },
+    'refri_1l': { name: 'Refrigerante 1L', price: 10.00, category: 'bebida' },
     // Porções
-    'batata_150': { name: 'Batata Frita 150g', price: 10.00, category: 'porcao', available: true },
-    'batata_300': { name: 'Batata Frita 300g', price: 15.00, category: 'porcao', available: true }
+    'batata_150': { name: 'Batata Frita 150g', price: 10.00, category: 'porcao' },
+    'batata_300': { name: 'Batata Frita 300g', price: 15.00, category: 'porcao' }
 };
 
 const ADDITIONALS = {
@@ -40,10 +37,11 @@ const ADDITIONALS = {
 };
 
 const CONFIG = {
-    deliveryText: "A combinar", // Alterado para texto em vez de valor fixo
-    whatsappNumber: '5569992588282',
+    deliveryFee: 0, // Será "a combinar"
+    deliveryText: 'A combinar',
+    whatsappNumber: '5511999999999', // Substitua pelo número real
     prepareTime: '15-20',
-    minDeliveryValue: 0
+    minDeliveryValue: 0 // Valor mínimo para delivery
 };
 
 // Estado da aplicação
@@ -62,14 +60,34 @@ const elements = {
     modalTitle: document.getElementById('modal-title'),
     deliveryFields: document.getElementById('delivery-fields'),
     localInstructions: document.getElementById('local-instructions'),
-    addressFields: document.getElementById('address-fields')
+    addressFields: document.getElementById('address-fields'),
+    // Carrinho flutuante
+    floatingCart: document.getElementById('floating-cart'),
+    floatingCartCount: document.getElementById('floating-cart-count'),
+    floatingItemsText: document.getElementById('floating-items-text'),
+    floatingTotal: document.getElementById('floating-total')
 };
 
 // Inicialização
 document.addEventListener('DOMContentLoaded', function() {
     initializeEventListeners();
     updateCartDisplay();
-    enhanceTouchExperience();
+    updateFloatingCart();
+    
+    // Scroll listener para mostrar/ocultar elementos
+    window.addEventListener('scroll', function() {
+        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+        
+        // Mostrar botão de scroll to top se necessário
+        const scrollTopBtn = document.querySelector('.scroll-top');
+        if (scrollTopBtn) {
+            if (scrollTop > 300) {
+                scrollTopBtn.classList.add('show');
+            } else {
+                scrollTopBtn.classList.remove('show');
+            }
+        }
+    });
 });
 
 // Event Listeners
@@ -129,18 +147,6 @@ function initializeEventListeners() {
     // Formatação de campos
     document.getElementById('customer-cep').addEventListener('input', formatarCep);
     document.getElementById('customer-phone').addEventListener('input', formatarTelefone);
-
-    // Listener para tecla ESC fechar modais
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') {
-            if (elements.customizeModal.style.display === 'flex') {
-                closeCustomizeModal();
-            }
-            if (elements.customerModal.style.display === 'flex') {
-                closeCustomerModal();
-            }
-        }
-    });
 }
 
 // Alternar opção de delivery
@@ -167,10 +173,7 @@ function updateQuantity(productId, change) {
 // Adicionar ao carrinho direto (sem personalização)
 function addToCartDirect(productId) {
     const product = PRODUCTS[productId];
-    if (!product || !product.available) {
-        showFeedback('Este produto não está disponível no momento.', 'error');
-        return;
-    }
+    if (!product) return;
 
     // Para bebidas e porções, usar a quantidade selecionada
     let quantity = 1;
@@ -178,7 +181,7 @@ function addToCartDirect(productId) {
     if (qtyElement) {
         quantity = parseInt(qtyElement.textContent);
         if (quantity <= 0) {
-            showFeedback('Selecione uma quantidade antes de adicionar.', 'error');
+            alert('Selecione uma quantidade antes de adicionar.');
             return;
         }
         qtyElement.textContent = '0'; // Resetar
@@ -223,7 +226,8 @@ function addItemToCart(productId, quantity = 1, additionals = [], notes = '') {
     }
     
     updateCartDisplay();
-    showFeedback(`${product.name} adicionado ao carrinho!`, 'success');
+    updateFloatingCart();
+    showFeedback(`${product.name} adicionado ao carrinho!`);
 }
 
 // Gerar ID único para item (considerando adicionais)
@@ -235,10 +239,7 @@ function generateItemId(productId, additionals = []) {
 // Abrir modal de personalização
 function openCustomizeModal(productId) {
     const product = PRODUCTS[productId];
-    if (!product || !product.available) {
-        showFeedback('Este produto não está disponível no momento.', 'error');
-        return;
-    }
+    if (!product) return;
 
     currentCustomizing = productId;
     
@@ -321,10 +322,7 @@ function updateCartDisplay() {
         elements.cartItems.appendChild(cartItemElement);
     }
     
-    // Calcular total - SEM adicionar taxa de entrega
-    let total = subtotal;
-    
-    // Mostrar apenas a mensagem "Entrega a combinar" para delivery
+    // Mostrar informação sobre entrega
     if (isDelivery && subtotal > 0) {
         elements.deliveryFeeContainer.style.display = 'block';
         elements.deliveryFeeValue.textContent = CONFIG.deliveryText;
@@ -332,16 +330,8 @@ function updateCartDisplay() {
         elements.deliveryFeeContainer.style.display = 'none';
     }
     
-    elements.cartTotal.textContent = `R$ ${total.toFixed(2)}`;
-    
-    // Adicionar event listeners aos botões de quantidade do carrinho
-    document.querySelectorAll('.cart-qty-btn').forEach(button => {
-        button.addEventListener('click', function() {
-            const itemId = this.dataset.item;
-            const action = this.dataset.action;
-            changeCartItemQuantity(itemId, action === 'increase' ? 1 : -1);
-        });
-    });
+    // Total mostra apenas o subtotal quando delivery é "a combinar"
+    elements.cartTotal.textContent = `R$ ${subtotal.toFixed(2)}`;
 }
 
 // Criar elemento do item do carrinho
@@ -374,6 +364,15 @@ function createCartItemElement(itemId, item, itemTotal) {
         <div class="cart-item-total">R$ ${itemTotal.toFixed(2)}</div>
     `;
     
+    // Adicionar event listeners aos botões de quantidade
+    cartItem.querySelectorAll('.cart-qty-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const itemId = this.dataset.item;
+            const action = this.dataset.action;
+            changeCartItemQuantity(itemId, action === 'increase' ? 1 : -1);
+        });
+    });
+    
     return cartItem;
 }
 
@@ -387,13 +386,57 @@ function changeCartItemQuantity(itemId, change) {
         }
         
         updateCartDisplay();
+        updateFloatingCart();
+    }
+}
+
+// Atualizar carrinho flutuante
+function updateFloatingCart() {
+    const summary = getCartSummary();
+    
+    if (summary.totalItems === 0) {
+        elements.floatingCart.classList.remove('show');
+        return;
+    }
+    
+    // Mostrar carrinho flutuante
+    elements.floatingCart.classList.add('show');
+    
+    // Atualizar contador
+    elements.floatingCartCount.textContent = summary.totalItems;
+    
+    // Atualizar texto dos itens
+    if (summary.totalItems === 1) {
+        elements.floatingItemsText.textContent = '1 item no carrinho';
+    } else {
+        elements.floatingItemsText.textContent = `${summary.totalItems} itens no carrinho`;
+    }
+    
+    // Atualizar total
+    elements.floatingTotal.textContent = `R$ ${summary.total.toFixed(2)}`;
+    
+    // Animar o contador
+    elements.floatingCartCount.style.animation = 'none';
+    setTimeout(() => {
+        elements.floatingCartCount.style.animation = 'pulse 0.5s ease-in-out';
+    }, 10);
+}
+
+// Scroll suave para o carrinho
+function scrollToCart() {
+    const cartSection = document.querySelector('.cart-section');
+    if (cartSection) {
+        cartSection.scrollIntoView({ 
+            behavior: 'smooth',
+            block: 'center'
+        });
     }
 }
 
 // Finalizar pedido
 function finalizarPedido() {
     if (Object.keys(cart).length === 0) {
-        showFeedback('Adicione itens ao carrinho antes de finalizar o pedido.', 'error');
+        alert('Adicione itens ao carrinho antes de finalizar o pedido.');
         return;
     }
     
@@ -425,7 +468,7 @@ function buscarCep() {
     const cep = document.getElementById('customer-cep').value.replace(/\D/g, '');
     
     if (cep.length !== 8) {
-        showFeedback('CEP inválido. Digite um CEP com 8 dígitos.', 'error');
+        alert('CEP inválido. Digite um CEP com 8 dígitos.');
         return;
     }
     
@@ -437,7 +480,7 @@ function buscarCep() {
         .then(response => response.json())
         .then(data => {
             if (data.erro) {
-                showFeedback('CEP não encontrado. Preencha o endereço manualmente.', 'error');
+                alert('CEP não encontrado. Preencha o endereço manualmente.');
                 elements.addressFields.style.display = 'block';
             } else {
                 document.getElementById('customer-address').value = data.logradouro || '';
@@ -451,7 +494,7 @@ function buscarCep() {
         })
         .catch(error => {
             console.error('Erro ao buscar CEP:', error);
-            showFeedback('Erro ao buscar CEP. Preencha o endereço manualmente.', 'error');
+            alert('Erro ao buscar CEP. Preencha o endereço manualmente.');
             elements.addressFields.style.display = 'block';
         })
         .finally(() => {
@@ -491,7 +534,7 @@ function enviarPedidoWhatsApp() {
     const notes = document.getElementById('customer-notes').value.trim();
     
     if (!name || !phone) {
-        showFeedback('Por favor, preencha pelo menos seu nome e telefone.', 'error');
+        alert('Por favor, preencha pelo menos seu nome e telefone.');
         return;
     }
     
@@ -500,7 +543,7 @@ function enviarPedidoWhatsApp() {
     const message = buildWhatsAppMessage(name, phone, notes);
     
     // Enviar para WhatsApp
-    window.open(`https://wa.me/${CONFIG.whatsappNumber}?text=${encodeURIComponent(message)}`, '_blank');
+    window.open(`https://wa.me/${CONFIG.whatsappNumber}?text=${message}`, '_blank');
     
     // Limpar e fechar
     clearFormAndCart();
@@ -518,7 +561,7 @@ function validateForm() {
         const state = document.getElementById('customer-state').value.trim();
         
         if (!address || !number || !neighborhood || !city || !state) {
-            showFeedback('Para delivery, é necessário informar o endereço completo.', 'error');
+            alert('Para delivery, é necessário informar o endereço completo.');
             return false;
         }
     }
@@ -528,10 +571,10 @@ function validateForm() {
 // Construir mensagem do WhatsApp
 function buildWhatsAppMessage(name, phone, notes) {
     const orderType = isDelivery ? 'Delivery' : 'Retirada';
-    let message = `*NOVO PEDIDO - Costela do Titi*\n\n`;
-    message += `*Cliente:* ${name}\n`;
-    message += `*Telefone:* ${phone}\n`;
-    message += `*Tipo:* ${orderType}\n\n`;
+    let message = `*NOVO PEDIDO - Costela do Titi*%0A%0A`;
+    message += `*Cliente:* ${name}%0A`;
+    message += `*Telefone:* ${phone}%0A`;
+    message += `*Tipo:* ${orderType}%0A%0A`;
     
     // Endereço para delivery
     if (isDelivery) {
@@ -544,11 +587,11 @@ function buildWhatsAppMessage(name, phone, notes) {
         
         message += `*Endereço:* ${address}, ${number}`;
         if (complement) message += `, ${complement}`;
-        message += ` - ${neighborhood}, ${city}-${state}\n\n`;
+        message += ` - ${neighborhood}, ${city}-${state}%0A%0A`;
     }
     
     // Itens do pedido por categoria
-    message += `*ITENS DO PEDIDO:*\n\n`;
+    message += `*ITENS DO PEDIDO:*%0A%0A`;
     
     const categories = {
         'lanche': '🍔 *LANCHES*',
@@ -573,7 +616,7 @@ function buildWhatsAppMessage(name, phone, notes) {
     // Exibir itens por categoria
     Object.keys(itemsByCategory).forEach(category => {
         if (categories[category]) {
-            message += `${categories[category]}\n`;
+            message += `${categories[category]}%0A`;
         }
         
         itemsByCategory[category].forEach(item => {
@@ -589,35 +632,40 @@ function buildWhatsAppMessage(name, phone, notes) {
             message += ` - R$ ${itemTotal.toFixed(2)}`;
             
             if (item.notes) {
-                message += `\n  _Obs: ${item.notes}_`;
+                message += `%0A  _Obs: ${item.notes}_`;
             }
             
-            message += `\n`;
+            message += `%0A`;
         });
         
-        message += `\n`;
+        message += `%0A`;
     });
     
-    // Taxa de entrega - agora mostra "a combinar"
+    // Informação sobre entrega
     if (isDelivery) {
-        message += `📦 *Taxa de entrega:* ${CONFIG.deliveryText}\n\n`;
+        message += `🚚 *Taxa de entrega: ${CONFIG.deliveryText}*%0A%0A`;
     }
     
-    // Total - apenas o valor dos produtos
-    message += `💰 *TOTAL: R$ ${subtotal.toFixed(2)}*\n\n`;
+    // Total (subtotal quando entrega é a combinar)
+    message += `💰 *SUBTOTAL: R$ ${subtotal.toFixed(2)}*%0A`;
+    if (isDelivery) {
+        message += `💰 *TOTAL: A calcular com a taxa de entrega*%0A%0A`;
+    } else {
+        message += `%0A`;
+    }
     
     // Observações gerais
     if (notes) {
-        message += `📝 *Observações:* ${notes}\n\n`;
+        message += `📝 *Observações:* ${notes}%0A%0A`;
     }
     
     // Instruções finais
     if (isDelivery) {
-        message += `🚚 *Delivery* - Entrega a combinar\n`;
-        message += `Entraremos em contato para combinar valor e tempo de entrega!\n\n`;
+        message += `🚚 *Delivery* - Tempo estimado: 30-45 minutos%0A`;
+        message += `Entraremos em contato para confirmar o pedido e informar o valor da entrega!%0A%0A`;
     } else {
-        message += `🏪 *Retirada no Local* - Tempo estimado: ${CONFIG.prepareTime} minutos\n`;
-        message += `Avisaremos quando estiver pronto para retirada!\n\n`;
+        message += `🏪 *Retirada no Local* - Tempo estimado: ${CONFIG.prepareTime} minutos%0A`;
+        message += `Avisaremos quando estiver pronto para retirada!%0A%0A`;
     }
     
     message += `_Pedido realizado via site_`;
@@ -652,6 +700,7 @@ function clearFormAndCart() {
     
     // Atualizar display do carrinho
     updateCartDisplay();
+    updateFloatingCart();
 }
 
 // Mostrar feedback para o usuário
@@ -670,16 +719,37 @@ function showFeedback(message, type = 'info') {
         <span>${message}</span>
     `;
     
+    // Estilos inline para o feedback
+    Object.assign(feedback.style, {
+        position: 'fixed',
+        top: '20px',
+        right: '20px',
+        background: type === 'success' ? '#28a745' : '#007bff',
+        color: 'white',
+        padding: '15px 20px',
+        borderRadius: '8px',
+        boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+        zIndex: '9999',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '10px',
+        fontSize: '14px',
+        fontWeight: '500',
+        maxWidth: '300px',
+        transform: 'translateX(100%)',
+        transition: 'transform 0.3s ease-in-out'
+    });
+    
     document.body.appendChild(feedback);
     
     // Animação de entrada
-    setTimeout(() => {
-        feedback.classList.add('show');
-    }, 10);
+    requestAnimationFrame(() => {
+        feedback.style.transform = 'translateX(0)';
+    });
     
     // Remover após 3 segundos
     setTimeout(() => {
-        feedback.classList.remove('show');
+        feedback.style.transform = 'translateX(100%)';
         setTimeout(() => {
             if (feedback.parentNode) {
                 feedback.remove();
@@ -688,56 +758,41 @@ function showFeedback(message, type = 'info') {
     }, 3000);
 }
 
-// Melhorar experiência de toque para dispositivos móveis
-function enhanceTouchExperience() {
-    // Aumentar a área de toque para todos os botões
-    document.querySelectorAll('button').forEach(button => {
-        button.style.minHeight = '44px';
-        button.style.minWidth = '44px';
-        button.style.display = 'flex';
-        button.style.alignItems = 'center';
-        button.style.justifyContent = 'center';
-    });
+// Função para calcular resumo do carrinho
+function getCartSummary() {
+    const summary = {
+        itemCount: 0,
+        totalItems: 0,
+        subtotal: 0,
+        deliveryFee: 0, // Sempre 0 quando é "a combinar"
+        deliveryText: isDelivery ? CONFIG.deliveryText : '',
+        total: 0
+    };
     
-    // Prevenir zoom em inputs ao focar (em alguns dispositivos)
-    document.querySelectorAll('input, select, textarea').forEach(input => {
-        input.addEventListener('focus', () => {
-            document.querySelector('meta[name="viewport"]')
-                .setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no');
-        });
-        
-        input.addEventListener('blur', () => {
-            document.querySelector('meta[name="viewport"]')
-                .setAttribute('content', 'width=device-width, initial-scale=1.0');
-        });
-    });
+    for (const itemId in cart) {
+        const item = cart[itemId];
+        summary.itemCount++;
+        summary.totalItems += item.quantity;
+        summary.subtotal += item.totalPrice * item.quantity;
+    }
+    
+    // Total é apenas o subtotal quando entrega é "a combinar"
+    summary.total = summary.subtotal;
+    
+    return summary;
 }
 
-// Inicializar validação de formulário
-function initFormValidation() {
-    // Validação de nome
-    const nameInput = document.getElementById('customer-name');
-    if (nameInput) {
-        nameInput.addEventListener('blur', function() {
-            if (!isValidName(this.value)) {
-                this.style.borderColor = '#dc3545';
-            } else {
-                this.style.borderColor = '#28a745';
-            }
-        });
-    }
-    
-    // Validação de telefone
-    const phoneInput = document.getElementById('customer-phone');
-    if (phoneInput) {
-        phoneInput.addEventListener('blur', function() {
-            if (!isValidPhone(this.value)) {
-                this.style.borderColor = '#dc3545';
-            } else {
-                this.style.borderColor = '#28a745';
-            }
-        });
-    }
+// Função utilitária para debounce
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
 }
 
 // Função para validar telefone
@@ -751,10 +806,79 @@ function isValidName(name) {
     return name.trim().length >= 2;
 }
 
-// Inicializar validação de formulário quando o DOM estiver carregado
-document.addEventListener('DOMContentLoaded', initFormValidation);
+// Adicionar validação em tempo real
+document.addEventListener('DOMContentLoaded', function() {
+    // Validação de nome
+    const nameInput = document.getElementById('customer-name');
+    if (nameInput) {
+        nameInput.addEventListener('blur', function() {
+            if (!isValidName(this.value)) {
+                this.style.borderColor = '#dc3545';
+                showFeedback('Nome deve ter pelo menos 2 caracteres', 'error');
+            } else {
+                this.style.borderColor = '#28a745';
+            }
+        });
+    }
+    
+    // Validação de telefone
+    const phoneInput = document.getElementById('customer-phone');
+    if (phoneInput) {
+        phoneInput.addEventListener('blur', function() {
+            if (!isValidPhone(this.value)) {
+                this.style.borderColor = '#dc3545';
+                showFeedback('Digite um telefone válido', 'error');
+            } else {
+                this.style.borderColor = '#28a745';
+            }
+        });
+    }
+});
 
-// Console log para debugging
+// Função para exportar pedido (para futuras implementações)
+function exportOrder() {
+    const summary = getCartSummary();
+    const orderData = {
+        timestamp: new Date().toISOString(),
+        type: isDelivery ? 'delivery' : 'pickup',
+        items: cart,
+        summary: summary,
+        customer: {
+            name: document.getElementById('customer-name').value,
+            phone: document.getElementById('customer-phone').value,
+            // Adicionar mais campos conforme necessário
+        }
+    };
+    
+    return orderData;
+}
+
+// Listener para tecla ESC fechar modais
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        if (elements.customizeModal.style.display === 'flex') {
+            closeCustomizeModal();
+        }
+        if (elements.customerModal.style.display === 'flex') {
+            closeCustomerModal();
+        }
+    }
+});
+
+// Função para smooth scroll (se necessário)
+function scrollToElement(elementId) {
+    const element = document.getElementById(elementId);
+    if (element) {
+        element.scrollIntoView({ 
+            behavior: 'smooth',
+            block: 'start'
+        });
+    }
+}
+
+// Console log para debugging (remover em produção)
 if (typeof console !== 'undefined') {
     console.log('Sistema Costela do Titi carregado com sucesso!');
+    console.log('Produtos disponíveis:', Object.keys(PRODUCTS).length);
+    console.log('Adicionais disponíveis:', Object.keys(ADDITIONALS).length);
 }

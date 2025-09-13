@@ -17,7 +17,7 @@
                 </div>
                 
                 <div class="delivery-option">
-                    <button class="delivery-btn active" id="local-btn">Retirada no Local</button>
+                    <button class="delivery-btn active" id="local-btn">Comer no Local</button>
                     <button class="delivery-btn" id="viagem-btn">Para Viagem</button>
                 </div>
             </div>
@@ -38,12 +38,10 @@
             
             <div class="menu-items">
                 <div class="menu-item">
-                    <div class="item-image" style="background-color: #f0f0f0; display: flex; align-items: center; justify-content: center;">
-                        <i class="fas fa-hamburger" style="font-size: 48px; color: #ccc;"></i>
-                    </div>
+                    <div class="item-image" style="background-image: url('https://images.unsplash.com/photo-1551782450-a2132b4ba21d?ixlib=rb-4.0.3&auto=format&fit=crop&w=2069&q=80');"></div>
                     <div class="item-content">
                         <h3 class="item-title">Pão da Casa</h3>
-                        <p class="item-description">Pão, carne 120g, queijo, alface e banana frita. Uma combinação clássica e saborosa.</p>
+                        <p class="item-description">Pão, carne 100g, queijo, alface e banana frita, cebola roxa. Uma combinação clássica e saborosa.</p>
                         <div class="item-price">R$ 20,00</div>
                         <div class="item-actions">
                             <button class="customize-btn" data-product="casa">
@@ -55,13 +53,11 @@
                 </div>
                 
                 <div class="menu-item">
-                    <div class="item-image" style="background-color: #f0f0f0; display: flex; align-items: center; justify-content: center;">
-                        <i class="fas fa-bacon" style="font-size: 48px; color: #ccc;"></i>
-                    </div>
+                    <div class="item-image" style="background-image: url('https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?ixlib=rb-4.0.3&auto=format&fit=crop&w=2088&q=80');"></div>
                     <div class="item-content">
                         <h3 class="item-title">Pão do Titi</h3>
-                        <p class="item-description">Pão, costela desfiada 150g, queijo mussarela, bacon, alface, cebola roxa e banana frita. Nosso carro-chefe!</p>
-                        <div class="item-price">R$ 27,00</div>
+                        <p class="item-description">Pão, carne 150g, queijo, bacon, alface, cebola roxa e banana frita. Nosso carro-chefe!</p>
+                        <div class="item-price">R$ 25,00</div>
                         <div class="item-actions">
                             <button class="customize-btn" data-product="titi">
                                 <i class="fas fa-cogs"></i> Personalizar
@@ -71,23 +67,17 @@
                     </div>
                 </div>
                 
-                <div class="menu-item unavailable">
-                    <div class="item-unavailable-overlay">
-                        <i class="fas fa-clock"></i>
-                        <span>Disponível em breve</span>
-                    </div>
-                    <div class="item-image" style="background-color: #f0f0f0; display: flex; align-items: center; justify-content: center; filter: grayscale(70%); opacity: 0.7;">
-                        <i class="fas fa-crown" style="font-size: 48px; color: #ccc;"></i>
-                    </div>
+                <div class="menu-item">
+                    <div class="item-image" style="background-image: url('https://images.unsplash.com/photo-1572802419224-296b0aeee0d9?ixlib=rb-4.0.3&auto=format&fit=crop&w=2103&q=80');"></div>
                     <div class="item-content">
                         <h3 class="item-title">Costela Premium</h3>
                         <p class="item-description">Pão baguete, costela defumada 180g, queijo cheddar, cebola caramelizada e molho barbecue.</p>
                         <div class="item-price">R$ 29,90</div>
                         <div class="item-actions">
-                            <button class="customize-btn disabled" data-product="premium" disabled>
-                                <i class="fas fa-cogs"></i> Indisponível
+                            <button class="customize-btn" data-product="premium">
+                                <i class="fas fa-cogs"></i> Personalizar
                             </button>
-                            <button class="add-to-cart-direct disabled" data-product="premium" disabled>Indisponível</button>
+                            <button class="add-to-cart-direct" data-product="premium">Adicionar</button>
                         </div>
                     </div>
                 </div>
@@ -213,11 +203,11 @@
                     <div class="empty-cart">Seu carrinho está vazio</div>
                 </div>
                 
-               <div id="delivery-fee-container" style="display: none;">
+                <div id="delivery-fee-container" style="display: none;">
                     <div class="delivery-fee">
-                         <span>Taxa de Entrega:</span>
-                         <span id="delivery-fee-value">A combinar</span>
-                     </div>
+                        <span>Taxa de Entrega:</span>
+                        <span id="delivery-fee-value">R$ 5,00</span>
+                    </div>
                 </div>
                 
                 <div class="cart-total">
@@ -367,6 +357,28 @@
         </div>
     </div>
     
+    <!-- Carrinho Flutuante -->
+    <div class="floating-cart" id="floating-cart">
+        <div class="floating-cart-content" onclick="scrollToCart()">
+            <div class="cart-icon">
+                <i class="fas fa-shopping-cart"></i>
+                <span class="cart-count" id="floating-cart-count">0</span>
+            </div>
+            <div class="cart-info">
+                <div class="cart-items-count" id="floating-items-text">Carrinho vazio</div>
+                <div class="cart-total-value" id="floating-total">R$ 0,00</div>
+            </div>
+        </div>
+        <button class="floating-checkout" onclick="scrollToCart()">
+            Ver Carrinho
+        </button>
+    </div>
+
+    <!-- Botão Scroll to Top -->
+    <button class="scroll-top" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+    
     <footer>
         <div class="container">
             <div class="footer-content">
@@ -383,7 +395,7 @@
                     </div>
                     <div class="contact-item">
                         <i class="fas fa-clock"></i>
-                        <span>Aberto aos sábados, 19h-23h</span>
+                        <span>Aberto aos finais de semana, 19h-23h</span>
                     </div>
                 </div>
                 
