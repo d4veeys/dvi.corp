@@ -26,7 +26,7 @@ const PRODUCTS = {
             description: "Pão especial, costela premium 150g, queijo, bacon crocante, alface, cebola roxa e banana frita.",
             price: 27.00,
             category: "sandwiches",
-            image: "images/pao-d0-titi.jpg",
+            image: "images/pao-do-titi.jpg",
             badges: ["bestseller", "recommended"],
             features: ["Premium", "Defumado 12h", "Premiado"],
             rating: 4.9,
