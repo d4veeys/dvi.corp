@@ -87,9 +87,24 @@ class DeliveryApp {
     setupScrollEffects() {
         const scrollTopBtn = document.querySelector('.scroll-top');
         const floatingCart = document.getElementById('floating-cart');
+        const header = document.querySelector('header');
+        let lastScrollY = window.scrollY;
+        let ticking = false;
 
-        window.addEventListener('scroll', () => {
+        const updateScroll = () => {
             const scrollY = window.scrollY;
+            const scrollDirection = scrollY > lastScrollY ? 'down' : 'up';
+            
+            // Header hide/show no mobile
+            if (window.innerWidth <= 768) {
+                if (scrollDirection === 'down' && scrollY > 100) {
+                    header?.classList.add('hidden');
+                } else if (scrollDirection === 'up') {
+                    header?.classList.remove('hidden');
+                }
+            } else {
+                header?.classList.remove('hidden');
+            }
             
             // Botão scroll to top
             if (scrollTopBtn) {
@@ -99,6 +114,23 @@ class DeliveryApp {
             // Carrinho flutuante
             if (floatingCart && this.cart.length > 0) {
                 floatingCart.classList.toggle('visible', scrollY > 500);
+            }
+
+            lastScrollY = scrollY;
+            ticking = false;
+        };
+
+        window.addEventListener('scroll', () => {
+            if (!ticking) {
+                requestAnimationFrame(updateScroll);
+                ticking = true;
+            }
+        });
+
+        // Atualizar no resize
+        window.addEventListener('resize', () => {
+            if (window.innerWidth > 768) {
+                header?.classList.remove('hidden');
             }
         });
     }
@@ -202,7 +234,7 @@ class DeliveryApp {
                         ${product.originalPrice ? `<span class="original-price">${formatPrice(product.originalPrice)}</span>` : ''}
                     </div>
                     <div class="item-actions">
-                        ${product.customizable ? `<button class="customize-btn" data-product="${product.id}"><i class="fas fa-cogs"></i> Personalizar</button>` : ''}
+                        ${product.customizable ? `<button class="customize-btn" data-product="${product.id}"><i class="fas fa-utensil-spoon"></i> Personalizar</button>` : ''}
                         <button class="add-to-cart-direct" data-product="${product.id}">Adicionar</button>
                     </div>
                 </div>
