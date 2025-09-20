@@ -9,13 +9,13 @@ const PRODUCTS = {
         casa: {
             id: 'casa',
             name: "Pão da Casa",
-            description: "Pão artesanal, costela desfiada 100g, queijo derretido, alface crocante e banana frita dourada.",
+            description: "Pão artesanal, costela desfiada 100g, queijo derretido, alface e banana frita.",
             price: 20.00,
             originalPrice: 25.00,
             category: "sandwiches",
-            image: "images/pao-da-casa.jpg",
+            image: "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgdmlld0JveD0iMCAwIDQwMCAzMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjQwMCIgaGVpZ2h0PSIzMDAiIGZpbGw9IiNGNUY1RjUiLz48cGF0aCBkPSJNMjAwIDEwMEM4OS41NDMgMTAwIDAgMTI2LjI4MSAwIDE2MEMwIDE5My43MTkgODkuNTQzIDIyMCAyMDAgMjIwQzMxMC40NTcgMjIwIDQwMCAxOTMuNzE5IDQwMCAxNjBDNDAwIDEyNi4yODEgMzEwLjQ1NyAxMDAgMjAwIDEwMFoiIGZpbGw9IiNEQUE1MjAiLz48dGV4dCB4PSIyMDAiIHk9IjE2MCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iI0ZGRkZGRiIgZm9udC1zaXplPSIxOCIgZm9udC1mYW1pbHk9IkFyaWFsIj5QQU8gREEgQ0FTQTwvdGV4dD48L3N2Zz4=",
             badges: ["popular", "discount"],
-            features: ["20 min", "Defumado", "120g"],
+            features: ["25 min", "Defumado", "100g"],
             rating: 4.8,
             reviews: 89,
             customizable: true
@@ -23,10 +23,10 @@ const PRODUCTS = {
         titi: {
             id: 'titi',
             name: "Pão do Titi",
-            description: "Pão especial, costela premium 150g, queijo cheddar, bacon crocante, alface, cebola roxa e banana frita.",
+            description: "Pão especial, costela premium 150g, queijo mussarela, bacon crocante, alface, cebola roxa e banana frita.",
             price: 27.00,
             category: "sandwiches",
-            image: "images/pao-do-titi.jpg",
+            image: "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgdmlld0JveD0iMCAwIDQwMCAzMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjQwMCIgaGVpZ2h0PSIzMDAiIGZpbGw9IiNGNUY1RjUiLz48cGF0aCBkPSJNMjAwIDEwMEM4OS41NDMgMTAwIDAgMTI2LjI4MSAwIDE2MEMwIDE5My43MTkgODkuNTQzIDIyMCAyMDAgMjIwQzMxMC40NTcgMjIwIDQwMCAxOTMuNzE5IDQwMCAxNjBDNDAwIDEyNi4yODEgMzEwLjQ1NyAxMDAgMjAwIDEwMFoiIGZpbGw9IiM4QjQ1MTMiLz48dGV4dCB4PSIyMDAiIHk9IjE2MCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iI0ZGRkZGRiIgZm9udC1zaXplPSIxOCIgZm9udC1mYW1pbHk9IkFyaWFsIj5QQU8gRE8gVElUSTwvdGV4dD48L3N2Zz4=",
             badges: ["bestseller", "recommended"],
             features: ["Premium", "Defumado 12h", "Premiado"],
             rating: 4.9,
@@ -36,10 +36,10 @@ const PRODUCTS = {
         premium: {
             id: 'premium',
             name: "Cupim Premium",
-            description: "Pão baguete artesanal, Cupim premium 150g, queijo cheddar especial, cebola caramelizada e molho barbecue artesanal.",
+            description: "Pão baguete artesanal, Cupim premium 150g, queijo mussarela, bacon crocante, alface, cebola roxa e banana frita. .",
             price: 29.90,
             category: "sandwiches",
-            image: "images/cupim-premium.jpg",
+            image: "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgdmlld0JveD0iMCAwIDQwMCAzMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjQwMCIgaGVpZ2h0PSIzMDAiIGZpbGw9IiNGNUY1RjUiLz48cGF0aCBkPSJNMjAwIDEwMEM4OS41NDMgMTAwIDAgMTI2LjI4MSAwIDE2MEMwIDE5My43MTkgODkuNTQzIDIyMCAyMDAgMjIwQzMxMC40NTcgMjIwIDQwMCAxOTMuNzE5IDQwMCAxNjBDNDAwIDEyNi4yODEgMzEwLjQ1NyAxMDAgMjAwIDEwMFoiIGZpbGw9IiM5QjU5QjYiLz48dGV4dCB4PSIyMDAiIHk9IjE2MCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iI0ZGRkZGRiIgZm9udC1zaXplPSIxOCIgZm9udC1mYW1pbHk9IkFyaWFsIj5DVVBJTSBQUkVNSVVNPC90ZXh0Pjwvc3ZnPg==",
             badges: ["premium", "exclusive"],
             features: ["Gourmet", "180g", "Chef"],
             rating: 4.9,
@@ -53,7 +53,7 @@ const PRODUCTS = {
         agua_mineral: {
             id: 'agua_mineral',
             name: "Água Mineral",
-            description: "Água mineral natural gelada",
+            description: "Água mineral natural gelada 500ml",
             price: 3.00,
             category: "drinks",
             image: "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=400&h=300&fit=crop&crop=center",
@@ -62,29 +62,91 @@ const PRODUCTS = {
         agua_gas: {
             id: 'agua_gas',
             name: "Água Mineral c/ Gás",
-            description: "Água mineral com gás gelada",
+            description: "Água mineral com gás gelada 500ml",
             price: 4.00,
             category: "drinks",
             image: "https://images.unsplash.com/photo-1523362628745-0c100150b504?w=400&h=300&fit=crop&crop=center",
             customizable: false
         },
-        refri_lata: {
-            id: 'refri_lata',
-            name: "Refrigerante Lata",
-            description: "Coca-Cola, Guaraná, Sprite",
+        coca_lata: {
+            id: 'coca_lata',
+            name: "Coca-Cola Lata",
+            description: "Coca-Cola gelada 350ml",
             price: 5.00,
             category: "drinks",
             image: "https://images.unsplash.com/photo-1629203851122-3726ecdf080e?w=400&h=300&fit=crop&crop=center",
-            customizable: false
+            customizable: false,
+            flavors: ["Coca-Cola Original"]
         },
-        refri_1l: {
-            id: 'refri_1l',
-            name: "Refrigerante 1L",
-            description: "Coca-Cola, Guaraná para compartilhar",
+        coca_zero_lata: {
+            id: 'coca_zero_lata',
+            name: "Coca-Cola Zero Lata",
+            description: "Coca-Cola Zero gelada 350ml",
+            price: 5.00,
+            category: "drinks",
+            image: "https://images.unsplash.com/photo-1629203851122-3726ecdf080e?w=400&h=300&fit=crop&crop=center",
+            customizable: false,
+            flavors: ["Coca-Cola Zero"]
+        },
+        guarana_lata: {
+            id: 'guarana_lata',
+            name: "Guaraná Lata",
+            description: "Guaraná gelado 350ml",
+            price: 5.00,
+            category: "drinks",
+            image: "https://images.unsplash.com/photo-1629203851122-3726ecdf080e?w=400&h=300&fit=crop&crop=center",
+            customizable: false,
+            flavors: ["Guaraná Antarctica"]
+        },
+        guarana_zero_lata: {
+            id: 'guarana_zero_lata',
+            name: "Guaraná Zero Lata",
+            description: "Guaraná Zero gelado 350ml",
+            price: 5.00,
+            category: "drinks",
+            image: "https://images.unsplash.com/photo-1629203851122-3726ecdf080e?w=400&h=300&fit=crop&crop=center",
+            customizable: false,
+            flavors: ["Guaraná Zero"]
+        },
+        fanta_lata: {
+            id: 'fanta_lata',
+            name: "Fanta Lata",
+            description: "Fanta gelada 350ml",
+            price: 5.00,
+            category: "drinks",
+            image: "https://images.unsplash.com/photo-1629203851122-3726ecdf080e?w=400&h=300&fit=crop&crop=center",
+            customizable: false,
+            flavors: ["Laranja", "Uva", "Maracujá"]
+        },
+        coca_1l: {
+            id: 'coca_1l',
+            name: "Coca-Cola 1L",
+            description: "Coca-Cola 1L para compartilhar",
             price: 10.00,
             category: "drinks",
             image: "https://images.unsplash.com/photo-1581636625402-29d2c5305b85?w=400&h=300&fit=crop&crop=center",
-            customizable: false
+            customizable: false,
+            flavors: ["Coca-Cola Original"]
+        },
+        guarana_1l: {
+            id: 'guarana_1l',
+            name: "Guaraná 1L",
+            description: "Guaraná 1L para compartilhar",
+            price: 10.00,
+            category: "drinks",
+            image: "https://images.unsplash.com/photo-1581636625402-29d2c5305b85?w=400&h=300&fit=crop&crop=center",
+            customizable: false,
+            flavors: ["Guaraná Antarctica"]
+        },
+        fanta_1l: {
+            id: 'fanta_1l',
+            name: "Fanta 1L",
+            description: "Fanta 1L para compartilhar",
+            price: 10.00,
+            category: "drinks",
+            image: "https://images.unsplash.com/photo-1581636625402-29d2c5305b85?w=400&h=300&fit=crop&crop=center",
+            customizable: false,
+            flavors: ["Laranja", "Uva", "Maracujá"]
         }
     },
 
@@ -96,7 +158,7 @@ const PRODUCTS = {
             description: "Batata rústica crocante individual",
             price: 10.00,
             category: "sides",
-            image: "images/batata-150g.jpg",
+            image: "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgdmlld0JveD0iMCAwIDQwMCAzMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjQwMCIgaGVpZ2h0PSIzMDAiIGZpbGw9IiNGNUY1RjUiLz48Y2lyY2xlIGN4PSIyMDAiIGN5PSIxNTAiIHI9IjgwIiBmaWxsPSIjRkY2QjM1Ii8+PHRleHQgeD0iMjAwIiB5PSIxNTAiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiNGRkZGRkYiIGZvbnQtc2l6ZT0iMTQiIGZvbnQtZmFtaWx5PSJBcmlhbCI+QkFUQVRBIDE1MEc8L3RleHQ+PC9zdmc+",
             customizable: false
         },
         batata_300: {
@@ -105,7 +167,7 @@ const PRODUCTS = {
             description: "Batata rústica crocante para compartilhar",
             price: 15.00,
             category: "sides",
-            image: "images/batata-300g.jpg",
+            image: "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgdmlld0JveD0iMCAwIDQwMCAzMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjQwMCIgaGVpZ2h0PSIzMDAiIGZpbGw9IiNGNUY1RjUiLz48Y2lyY2xlIGN4PSIyMDAiIGN5PSIxNTAiIHI9IjkwIiBmaWxsPSIjRkY2QjM1Ii8+PHRleHQgeD0iMjAwIiB5PSIxNTAiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiNGRkZGRkYiIGZvbnQtc2l6ZT0iMTQiIGZvbnQtZmFtaWx5PSJBcmlhbCI+QkFUQVRBIDMwMEc8L3RleHQ+PC9zdmc+",
             customizable: false
         }
     }
@@ -166,19 +228,20 @@ const ADDITIONALS = {
 // Configurações de entrega
 const DELIVERY_CONFIG = {
     baseRate: 7.00,
-    maxDeliveryDistance: 10, // km
+    maxDeliveryDistance: 15, // km
     ranges: [
-        { maxDistance: 4, price: 8.00 },
-        { maxDistance: 6, price: 10.00 },
-        { maxDistance: 8, price: 12.00 },
-        { maxDistance: 10, price: 15.00 }
+        { maxDistance: 3, price: 5.00 },
+        { maxDistance: 6, price: 8.00 },
+        { maxDistance: 10, price: 12.00 },
+        { maxDistance: 15, price: 18.00 }
     ]
 };
 
-// Coordenadas da loja (exemplo: São Paulo)
+// Coordenadas da loja - Porto Velho, RO (Av. Tiradentes, 2958 - Embratel)
 const STORE_COORDINATES = {
-    lat: -23.5505,
-    lng: -46.6333
+    lat: -8.7619,
+    lng: -63.9039,
+    address: "Av. Tiradentes, 2958 - Embratel, Porto Velho - RO, 76820-882"
 };
 
 // WhatsApp da loja

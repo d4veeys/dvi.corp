@@ -2,9 +2,9 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Costela do Titi - Delivery de Sanduíches Gourmet</title>
-    <meta name="description" content="O melhor sanduíche de costela defumada da região. Delivery rápido e seguro!">
+    <meta name="description" content="O melhor sanduíche de costela defumada de Porto Velho. Delivery rápido e seguro!">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
 </head>
@@ -19,9 +19,10 @@
 
     <!-- Promo Banner -->
     <div class="promo-banner">
-        🔥 FRETE GRÁTIS para pedidos acima de R$ 50 em um raio de 4km!
+        🔥 Os melhores sanduíches de costela defumada de Porto Velho!
     </div>
 
+    <!-- Header -->
     <header>
         <div class="container">
             <div class="header-content">
@@ -36,11 +37,11 @@
                 </div>
                 
                 <div class="delivery-option">
-                    <button class="delivery-btn active" id="local-btn">
+                    <button class="delivery-btn active" id="local-btn" data-mode="local">
                         <i class="fas fa-utensils"></i>
                         <span>Comer no Local</span>
                     </button>
-                    <button class="delivery-btn" id="viagem-btn">
+                    <button class="delivery-btn" id="viagem-btn" data-mode="delivery">
                         <i class="fas fa-motorcycle"></i>
                         <span>Delivery</span>
                     </button>
@@ -60,6 +61,7 @@
         </div>
     </header>
     
+    <!-- Hero Section -->
     <section class="hero">
         <div class="hero-content">
             <h2>O Melhor Sanduíche de Costela Defumada</h2>
@@ -109,282 +111,34 @@
         </div>
     </section>
     
-    <!-- Menu Principal - Lanches -->
+    <!-- Menu Sections -->
     <section class="menu" id="menu">
         <div class="container">
             <div class="section-header">
                 <h2 class="section-title">Nossos Sanduíches Gourmet</h2>
                 <p class="section-subtitle">Cada sanduíche é uma obra de arte culinária</p>
             </div>
-            
-            <div class="menu-items">
-                <div class="menu-item featured">
-                    <div class="item-image-container">
-                        <img src="./images/pao-da-casa.jpg" alt="Pão da Casa" class="item-image">
-                        <div class="item-overlay">
-                            <button class="quick-add" data-product="casa">
-                                <i class="fas fa-plus"></i>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="item-badges">
-                        <span class="item-badge popular">Mais Pedido</span>
-                        <span class="item-badge discount">-20%</span>
-                    </div>
-                    <div class="item-content">
-                        <h3 class="item-title">Pão da Casa</h3>
-                        <p class="item-description">Pão artesanal, costela desfiada 120g, queijo derretido, alface crocante e banana frita dourada.</p>
-                        <div class="item-details">
-                            <div class="item-features">
-                                <span><i class="fas fa-clock"></i> 15 min</span>
-                                <span><i class="fas fa-fire"></i> Defumado</span>
-                                <span><i class="fas fa-weight-hanging"></i> 120g</span>
-                            </div>
-                            <div class="item-rating">
-                                <span class="stars">★★★★★</span>
-                                <span class="rating-count">(89)</span>
-                            </div>
-                        </div>
-                        <div class="item-price-section">
-                            <div class="item-price">
-                                R$ 20,00 
-                                <span class="original-price">R$ 25,00</span>
-                            </div>
-                            <div class="item-actions">
-                                <button class="customize-btn" data-product="casa">
-                                    <i class="fas fa-cogs"></i>
-                                    Personalizar
-                                </button>
-                                <button class="add-to-cart-direct" data-product="casa">
-                                    Adicionar
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="menu-item bestseller">
-                    <div class="item-image-container">
-                        <img src="./images/pao-do-titi.jpg" alt="Pão do Titi" class="item-image">
-                        <div class="item-overlay">
-                            <button class="quick-add" data-product="titi">
-                                <i class="fas fa-plus"></i>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="item-badges">
-                        <span class="item-badge bestseller">Best Seller</span>
-                        <span class="item-badge recommended">Recomendado</span>
-                    </div>
-                    <div class="item-content">
-                        <h3 class="item-title">Pão do Titi</h3>
-                        <p class="item-description">Pão especial, costela premium 120g, queijo cheddar, bacon crocante, alface, cebola roxa e banana frita.</p>
-                        <div class="item-details">
-                            <div class="item-features">
-                                <span><i class="fas fa-crown"></i> Premium</span>
-                                <span><i class="fas fa-fire"></i> Defumado 12h</span>
-                                <span><i class="fas fa-award"></i> Premiado</span>
-                            </div>
-                            <div class="item-rating">
-                                <span class="stars">★★★★★</span>
-                                <span class="rating-count">(156)</span>
-                            </div>
-                        </div>
-                        <div class="item-price-section">
-                            <div class="item-price">R$ 25,00</div>
-                            <div class="item-actions">
-                                <button class="customize-btn" data-product="titi">
-                                    <i class="fas fa-cogs"></i>
-                                    Personalizar
-                                </button>
-                                <button class="add-to-cart-direct" data-product="titi">
-                                    Adicionar
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="menu-item premium">
-                    <div class="item-image-container">
-                        <img src="./images/costela-premium.jpg" alt="Costela Premium" class="item-image">
-                        <div class="item-overlay">
-                            <button class="quick-add" data-product="premium">
-                                <i class="fas fa-plus"></i>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="item-badges">
-                        <span class="item-badge premium">Premium</span>
-                        <span class="item-badge exclusive">Exclusivo</span>
-                    </div>
-                    <div class="item-content">
-                        <h3 class="item-title">Costela Premium</h3>
-                        <p class="item-description">Pão baguete artesanal, costela defumada premium 180g, queijo cheddar especial, cebola caramelizada e molho barbecue artesanal.</p>
-                        <div class="item-details">
-                            <div class="item-features">
-                                <span><i class="fas fa-gem"></i> Gourmet</span>
-                                <span><i class="fas fa-fire"></i> 180g</span>
-                                <span><i class="fas fa-star"></i> Chef</span>
-                            </div>
-                            <div class="item-rating">
-                                <span class="stars">★★★★★</span>
-                                <span class="rating-count">(67)</span>
-                            </div>
-                        </div>
-                        <div class="item-price-section">
-                            <div class="item-price">R$ 29,90</div>
-                            <div class="item-actions">
-                                <button class="customize-btn" data-product="premium">
-                                    <i class="fas fa-cogs"></i>
-                                    Personalizar
-                                </button>
-                                <button class="add-to-cart-direct" data-product="premium">
-                                    Adicionar
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <div class="menu-items" id="sandwiches-menu"></div>
         </div>
     </section>
 
-    <!-- Menu Bebidas -->
     <section class="menu bebidas-section">
         <div class="container">
             <div class="section-header">
                 <h2 class="section-title">Bebidas Geladas</h2>
                 <p class="section-subtitle">Para acompanhar seu sanduíche</p>
             </div>
-            
-            <div class="simple-items">
-                <div class="simple-item">
-                    <div class="simple-image">
-                        <img src="./images/agua-mineral.jpg" alt="Água Mineral">
-                    </div>
-                    <div class="simple-item-info">
-                        <h4>Água Mineral</h4>
-                        <p>Água mineral natural gelada</p>
-                        <span class="simple-price">R$ 3,00</span>
-                    </div>
-                    <div class="simple-actions">
-                        <div class="quantity">
-                            <button class="qty-btn" data-product="agua_mineral" data-action="decrease">-</button>
-                            <span class="qty-value" id="qty-agua_mineral">0</span>
-                            <button class="qty-btn" data-product="agua_mineral" data-action="increase">+</button>
-                        </div>
-                        <button class="add-to-cart" data-product="agua_mineral">Adicionar</button>
-                    </div>
-                </div>
-
-                <div class="simple-item">
-                    <div class="simple-image">
-                        <img src="./images/agua-gas.jpg" alt="Água com Gás">
-                    </div>
-                    <div class="simple-item-info">
-                        <h4>Água Mineral c/ Gás</h4>
-                        <p>Água mineral com gás gelada</p>
-                        <span class="simple-price">R$ 4,00</span>
-                    </div>
-                    <div class="simple-actions">
-                        <div class="quantity">
-                            <button class="qty-btn" data-product="agua_gas" data-action="decrease">-</button>
-                            <span class="qty-value" id="qty-agua_gas">0</span>
-                            <button class="qty-btn" data-product="agua_gas" data-action="increase">+</button>
-                        </div>
-                        <button class="add-to-cart" data-product="agua_gas">Adicionar</button>
-                    </div>
-                </div>
-
-                <div class="simple-item">
-                    <div class="simple-image">
-                        <img src="./images/refrigerante-lata.jpg" alt="Refrigerante Lata">
-                    </div>
-                    <div class="simple-item-info">
-                        <h4>Refrigerante Lata</h4>
-                        <p>Coca-Cola, Guaraná, Sprite</p>
-                        <span class="simple-price">R$ 5,00</span>
-                    </div>
-                    <div class="simple-actions">
-                        <div class="quantity">
-                            <button class="qty-btn" data-product="refri_lata" data-action="decrease">-</button>
-                            <span class="qty-value" id="qty-refri_lata">0</span>
-                            <button class="qty-btn" data-product="refri_lata" data-action="increase">+</button>
-                        </div>
-                        <button class="add-to-cart" data-product="refri_lata">Adicionar</button>
-                    </div>
-                </div>
-
-                <div class="simple-item">
-                    <div class="simple-image">
-                        <img src="./images/refrigerante-1l.jpg" alt="Refrigerante 1L">
-                    </div>
-                    <div class="simple-item-info">
-                        <h4>Refrigerante 1L</h4>
-                        <p>Coca-Cola, Guaraná para compartilhar</p>
-                        <span class="simple-price">R$ 10,00</span>
-                    </div>
-                    <div class="simple-actions">
-                        <div class="quantity">
-                            <button class="qty-btn" data-product="refri_1l" data-action="decrease">-</button>
-                            <span class="qty-value" id="qty-refri_1l">0</span>
-                            <button class="qty-btn" data-product="refri_1l" data-action="increase">+</button>
-                        </div>
-                        <button class="add-to-cart" data-product="refri_1l">Adicionar</button>
-                    </div>
-                </div>
-            </div>
+            <div class="simple-items" id="drinks-menu"></div>
         </div>
     </section>
 
-    <!-- Menu Porções -->
     <section class="menu porcoes-section">
         <div class="container">
             <div class="section-header">
                 <h2 class="section-title">Acompanhamentos</h2>
                 <p class="section-subtitle">Batatas crocantes e saborosas</p>
             </div>
-            
-            <div class="simple-items">
-                <div class="simple-item">
-                    <div class="simple-image">
-                        <img src="./images/batata-150g.jpg" alt="Batata Frita 150g">
-                    </div>
-                    <div class="simple-item-info">
-                        <h4>Batata Frita 150g</h4>
-                        <p>Batata rústica crocante individual</p>
-                        <span class="simple-price">R$ 10,00</span>
-                    </div>
-                    <div class="simple-actions">
-                        <div class="quantity">
-                            <button class="qty-btn" data-product="batata_150" data-action="decrease">-</button>
-                            <span class="qty-value" id="qty-batata_150">0</span>
-                            <button class="qty-btn" data-product="batata_150" data-action="increase">+</button>
-                        </div>
-                        <button class="add-to-cart" data-product="batata_150">Adicionar</button>
-                    </div>
-                </div>
-
-                <div class="simple-item">
-                    <div class="simple-image">
-                        <img src="./images/batata-300g.jpg" alt="Batata Frita 300g">
-                    </div>
-                    <div class="simple-item-info">
-                        <h4>Batata Frita 300g</h4>
-                        <p>Batata rústica crocante para compartilhar</p>
-                        <span class="simple-price">R$ 15,00</span>
-                    </div>
-                    <div class="simple-actions">
-                        <div class="quantity">
-                            <button class="qty-btn" data-product="batata_300" data-action="decrease">-</button>
-                            <span class="qty-value" id="qty-batata_300">0</span>
-                            <button class="qty-btn" data-product="batata_300" data-action="increase">+</button>
-                        </div>
-                        <button class="add-to-cart" data-product="batata_300">Adicionar</button>
-                    </div>
-                </div>
-            </div>
+            <div class="simple-items" id="sides-menu"></div>
         </div>
     </section>
     
@@ -412,25 +166,7 @@
                     </div>
                 </div>
                 
-                <div class="cart-summary" id="cart-summary" style="display: none;">
-                    <div class="summary-line">
-                        <span>Subtotal:</span>
-                        <span id="cart-subtotal">R$ 0,00</span>
-                    </div>
-                    
-                    <div id="delivery-fee-container" style="display: none;">
-                        <div class="summary-line delivery-fee">
-                            <span>Taxa de Entrega:</span>
-                            <span id="delivery-fee-value">Calculando...</span>
-                        </div>
-                        <div class="delivery-info" id="delivery-info"></div>
-                    </div>
-                    
-                    <div class="summary-line total">
-                        <span>Total:</span>
-                        <span id="cart-total">R$ 0,00</span>
-                    </div>
-                </div>
+                <div class="cart-summary" id="cart-summary" style="display: none;"></div>
                 
                 <div class="checkout-buttons">
                     <button class="checkout-btn" id="finalizar-pedido">
@@ -477,47 +213,7 @@
 
             <div class="customize-section">
                 <h3>Adicionais</h3>
-                <div class="additionals-grid">
-                    <label class="additional-item">
-                        <input type="checkbox" name="additional" value="vinagrete" data-price="3">
-                        <span class="checkmark"></span>
-                        <div class="additional-info">
-                            <span class="additional-name">Vinagrete</span>
-                            <span class="additional-description">Molho especial da casa</span>
-                        </div>
-                        <span class="additional-price">+ R$ 3,00</span>
-                    </label>
-                    
-                    <label class="additional-item">
-                        <input type="checkbox" name="additional" value="requeijao" data-price="3">
-                        <span class="checkmark"></span>
-                        <div class="additional-info">
-                            <span class="additional-name">Requeijão</span>
-                            <span class="additional-description">Requeijão cremoso</span>
-                        </div>
-                        <span class="additional-price">+ R$ 3,00</span>
-                    </label>
-                    
-                    <label class="additional-item">
-                        <input type="checkbox" name="additional" value="bacon" data-price="3">
-                        <span class="checkmark"></span>
-                        <div class="additional-info">
-                            <span class="additional-name">Bacon</span>
-                            <span class="additional-description">Bacon crocante defumado</span>
-                        </div>
-                        <span class="additional-price">+ R$ 3,00</span>
-                    </label>
-                    
-                    <label class="additional-item">
-                        <input type="checkbox" name="additional" value="banana" data-price="2">
-                        <span class="checkmark"></span>
-                        <div class="additional-info">
-                            <span class="additional-name">Banana Frita</span>
-                            <span class="additional-description">Banana doce dourada</span>
-                        </div>
-                        <span class="additional-price">+ R$ 2,00</span>
-                    </label>
-                </div>
+                <div class="additionals-grid" id="additionals-grid"></div>
             </div>
 
             <div class="customize-section">
@@ -542,7 +238,7 @@
         </div>
     </div>
     
-    <!-- Modal de Informações do Cliente -->
+    <!-- Modal do Cliente -->
     <div class="modal" id="customer-modal">
         <div class="modal-content customer-modal-content">
             <div class="modal-header">
@@ -571,7 +267,7 @@
                 
                 <div class="form-group">
                     <label for="customer-phone">Telefone *</label>
-                    <input type="tel" id="customer-phone" placeholder="(11) 99999-9999" required>
+                    <input type="tel" id="customer-phone" placeholder="(69) 99999-9999" required>
                     <span class="field-error" id="phone-error"></span>
                 </div>
                 
@@ -579,7 +275,7 @@
                     <div class="form-group">
                         <label for="customer-cep">CEP *</label>
                         <div class="cep-search">
-                            <input type="text" id="customer-cep" placeholder="00000-000" maxlength="9">
+                            <input type="text" id="customer-cep" placeholder="76820-000" maxlength="9">
                             <button type="button" id="buscar-cep">
                                 <i class="fas fa-search"></i>
                                 Buscar
@@ -589,7 +285,7 @@
                         <div class="delivery-distance" id="delivery-distance" style="display: none;"></div>
                     </div>
                     
-                    <div class="address-fields" id="address-fields">
+                    <div class="address-fields" id="address-fields" style="display: none;">
                         <div class="form-group">
                             <label for="customer-address">Endereço *</label>
                             <input type="text" id="customer-address" placeholder="Rua, Avenida, etc." required>
@@ -618,7 +314,7 @@
                             </div>
                             <div class="form-group">
                                 <label for="customer-state">Estado *</label>
-                                <input type="text" id="customer-state" maxlength="2" placeholder="SP" required>
+                                <input type="text" id="customer-state" maxlength="2" placeholder="RO" required>
                             </div>
                         </div>
                     </div>
@@ -647,15 +343,13 @@
         <i class="fas fa-arrow-up"></i>
     </button>
     
-    <footer>
-        <div class="container">
-            <div class="footer-content">
+    <!-- Footer -->
     <footer>
         <div class="container">
             <div class="footer-content">
                 <div class="footer-section">
                     <h3>Costela do Titi</h3>
-                    <p>O melhor sanduíche de costela defumada da região</p>
+                    <p>O melhor sanduíche de costela defumada de Porto Velho</p>
                 </div>
                 
                 <div class="footer-section">
@@ -663,7 +357,11 @@
                     <div class="contact-info">
                         <div class="contact-item">
                             <i class="fas fa-map-marker-alt"></i>
-                            <span>Av. Tiradentes, 2958 - Embratel, Porto Velho - RO</span>
+                            <span>Av. Tiradentes, 2958 - Embratel</span>
+                        </div>
+                        <div class="contact-item">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>Porto Velho - RO, 76820-882</span>
                         </div>
                         <div class="contact-item">
                             <i class="fas fa-phone"></i>
@@ -678,12 +376,12 @@
                 
                 <div class="footer-section">
                     <h4>Delivery</h4>
-                    <p>Entregamos em toda região com taxa calculada automaticamente</p>
+                    <p>Entregamos em toda Porto Velho com taxa calculada automaticamente</p>
                     <div class="delivery-zones">
-                        <span>Até 4km: R$ 7,00</span>
-                        <span>Até 6km: R$ 10,00</span>
-                        <span>Até 8km: R$ 12,00</span>
-                        <span>Até 10km: R$ 15,00</span>
+                        <span>Até 3km: R$ 5,00</span>
+                        <span>Até 6km: R$ 8,00</span>
+                        <span>Até 10km: R$ 12,00</span>
+                        <span>Até 15km: R$ 18,00</span>
                     </div>
                 </div>
             </div>
@@ -691,14 +389,16 @@
             <div class="footer-bottom">
                 <p>&copy; 2024 Costela do Titi - Todos os direitos reservados</p>
                 <div class="social-links">
-                    <a href="#"><i class="fab fa-instagram"></i></a>
-                    <a href="#"><i class="fab fa-facebook"></i></a>
-                    <a href="#"><i class="fab fa-whatsapp"></i></a>
+                    <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                    <a href="#" aria-label="Facebook"><i class="fab fa-facebook"></i></a>
+                    <a href="#" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
                 </div>
             </div>
         </div>
     </footer>
     
+    <!-- Scripts -->
+    <script src="products.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
