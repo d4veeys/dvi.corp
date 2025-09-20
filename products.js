@@ -24,7 +24,7 @@ const PRODUCTS = {
             id: 'titi',
             name: "Pão do Titi",
             description: "Pão especial, costela premium 150g, queijo cheddar, bacon crocante, alface, cebola roxa e banana frita.",
-            price: 25.00,
+            price: 27.00,
             category: "sandwiches",
             image: "images/pao-do-titi.jpg",
             badges: ["bestseller", "recommended"],
@@ -35,8 +35,8 @@ const PRODUCTS = {
         },
         premium: {
             id: 'premium',
-            name: "Costela Premium",
-            description: "Pão baguete artesanal, costela defumada premium 180g, queijo cheddar especial, cebola caramelizada e molho barbecue artesanal.",
+            name: "Cupim Premium",
+            description: "Pão baguete artesanal, Cupim premium 150g, queijo cheddar especial, cebola caramelizada e molho barbecue artesanal.",
             price: 29.90,
             category: "sandwiches",
             image: "https://images.unsplash.com/photo-1571091718767-18b5b1457add?w=500&h=300&fit=crop&crop=center",
@@ -182,7 +182,7 @@ const STORE_COORDINATES = {
 };
 
 // WhatsApp da loja
-const WHATSAPP_NUMBER = '5511999999999';
+const WHATSAPP_NUMBER = '5569992588282';
 
 // Função para obter produto por ID
 function getProductById(productId) {
