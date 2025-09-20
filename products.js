@@ -98,16 +98,16 @@ const PRODUCTS = {
             description: "Batata rústica crocante individual",
             price: 10.00,
             category: "sides",
-            image: "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgdmlld0JveD0iMCAwIDQwMCAzMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjQwMCIgaGVpZ2h0PSIzMDAiIGZpbGw9IiNGNUY1RjUiLz48Y2lyY2xlIGN4PSIyMDAiIGN5PSIxNTAiIHI9IjgwIiBmaWxsPSIjRkY2QjM1Ii8+PHRleHQgeD0iMjAwIiB5PSIxNTAiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiNGRkZGRkYiIGZvbnQtc2l6ZT0iMTQiIGZvbnQtZmFtaWx5PSJBcmlhbCI+QkFUQVRBIDE1MEc8L3RleHQ+PC9zdmc+",
+            image: "images/batata-150g.jpg",
             customizable: false
         },
         batata_300: {
             id: 'batata_300',
-            name: "Batata Frita 300g",
+            name: "Batata Frita 250g",
             description: "Batata rústica crocante para compartilhar",
             price: 15.00,
             category: "sides",
-            image: "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgdmlld0JveD0iMCAwIDQwMCAzMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjQwMCIgaGVpZ2h0PSIzMDAiIGZpbGw9IiNGNUY1RjUiLz48Y2lyY2xlIGN4PSIyMDAiIGN5PSIxNTAiIHI9IjkwIiBmaWxsPSIjRkY2QjM1Ii8+PHRleHQgeD0iMjAwIiB5PSIxNTAiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiNGRkZGRkYiIGZvbnQtc2l6ZT0iMTQiIGZvbnQtZmFtaWx5PSJBcmlhbCI+QkFUQVRBIDMwMEc8L3RleHQ+PC9zdmc+",
+            image: "images/batata-300g.jpg",
             customizable: false
         }
     }
@@ -115,12 +115,12 @@ const PRODUCTS = {
 
 // Adicionais disponíveis para personalização
 const ADDITIONALS = {
-    vinagrete: {
+   /* vinagrete: {
         id: 'vinagrete',
         name: "Vinagrete",
         description: "Molho especial da casa",
         price: 3.00
-    },
+    },*/
     requeijao: {
         id: 'requeijao',
         name: "Requeijão",
@@ -145,12 +145,12 @@ const ADDITIONALS = {
         description: "Porção extra de queijo derretido",
         price: 4.00
     },
-    cebola_caramelizada: {
+    /*cebola_caramelizada: {
         id: 'cebola_caramelizada',
         name: "Cebola Caramelizada",
         description: "Cebola doce caramelizada",
         price: 3.50
-    },
+    }, */
     molho_barbecue: {
         id: 'molho_barbecue',
         name: "Molho Barbecue",
