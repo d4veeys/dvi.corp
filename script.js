@@ -1,884 +1,1164 @@
-// Configurações e constantes
-const PRODUCTS = {
-    // Lanches
-    'casa': { 
-        name: 'Pão da Casa', 
-        price: 20.00, 
-        category: 'lanche',
-        description: 'Pão, carne 120g, queijo, alface e banana frita'
-    },
-    'titi': { 
-        name: 'Pão do Titi', 
-        price: 25.00, 
-        category: 'lanche',
-        description: 'Pão, carne 120g, queijo, bacon, alface, cebola roxa e banana frita'
-    },
-    'premium': { 
-        name: 'Costela Premium', 
-        price: 29.90, 
-        category: 'lanche',
-        description: 'Pão baguete, costela defumada 180g, queijo cheddar, cebola caramelizada e molho barbecue'
-    },
-    // Bebidas
-    'agua_mineral': { name: 'Água Mineral', price: 3.00, category: 'bebida' },
-    'agua_gas': { name: 'Água Mineral c/ Gás', price: 4.00, category: 'bebida' },
-    'refri_lata': { name: 'Refrigerante Lata', price: 5.00, category: 'bebida' },
-    'refri_1l': { name: 'Refrigerante 1L', price: 10.00, category: 'bebida' },
-    // Porções
-    'batata_150': { name: 'Batata Frita 150g', price: 10.00, category: 'porcao' },
-    'batata_300': { name: 'Batata Frita 300g', price: 15.00, category: 'porcao' }
-};
+/**
+ * Sistema de Delivery - Costela do Titi
+ * Script principal com todas as funcionalidades
+ */
 
-const ADDITIONALS = {
-    'vinagrete': { name: 'Vinagrete', price: 3.00 },
-    'requeijao': { name: 'Requeijão', price: 3.00 },
-    'bacon': { name: 'Bacon', price: 3.00 },
-    'banana': { name: 'Banana', price: 2.00 }
-};
-
-const CONFIG = {
-    deliveryFee: 0, // Será "a combinar"
-    deliveryText: 'A combinar',
-    whatsappNumber: '5511999999999', // Substitua pelo número real
-    prepareTime: '15-20',
-    minDeliveryValue: 0 // Valor mínimo para delivery
-};
-
-// Estado da aplicação
-let cart = {};
-let isDelivery = false;
-let currentCustomizing = null;
-
-// Elementos DOM
-const elements = {
-    cartItems: document.getElementById('cart-items'),
-    cartTotal: document.getElementById('cart-total'),
-    deliveryFeeContainer: document.getElementById('delivery-fee-container'),
-    deliveryFeeValue: document.getElementById('delivery-fee-value'),
-    customerModal: document.getElementById('customer-modal'),
-    customizeModal: document.getElementById('customize-modal'),
-    modalTitle: document.getElementById('modal-title'),
-    deliveryFields: document.getElementById('delivery-fields'),
-    localInstructions: document.getElementById('local-instructions'),
-    addressFields: document.getElementById('address-fields'),
-    // Carrinho flutuante
-    floatingCart: document.getElementById('floating-cart'),
-    floatingCartCount: document.getElementById('floating-cart-count'),
-    floatingItemsText: document.getElementById('floating-items-text'),
-    floatingTotal: document.getElementById('floating-total')
-};
-
-// Inicialização
-document.addEventListener('DOMContentLoaded', function() {
-    initializeEventListeners();
-    updateCartDisplay();
-    updateFloatingCart();
-    
-    // Scroll listener para mostrar/ocultar elementos
-    window.addEventListener('scroll', function() {
-        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+class DeliveryApp {
+    constructor() {
+        this.cart = this.loadFromStorage('cart') || [];
+        this.deliveryMode = this.loadFromStorage('deliveryMode') || 'local';
+        this.customerData = this.loadFromStorage('customerData') || {};
+        this.currentCustomizeProduct = null;
+        this.deliveryFee = 0;
+        this.customerAddress = null;
         
-        // Mostrar botão de scroll to top se necessário
-        const scrollTopBtn = document.querySelector('.scroll-top');
-        if (scrollTopBtn) {
-            if (scrollTop > 300) {
-                scrollTopBtn.classList.add('show');
-            } else {
-                scrollTopBtn.classList.remove('show');
+        this.init();
+    }
+
+    // Inicialização do app
+    init() {
+        this.hideLoading();
+        this.setupEventListeners();
+        this.renderMenus();
+        this.updateDeliveryMode();
+        this.updateCartUI();
+        this.setupScrollEffects();
+    }
+
+    // Configurar event listeners
+    setupEventListeners() {
+        // Botões de delivery/local
+        document.getElementById('local-btn')?.addEventListener('click', () => this.setDeliveryMode('local'));
+        document.getElementById('viagem-btn')?.addEventListener('click', () => this.setDeliveryMode('delivery'));
+
+        // Carrinho
+        document.getElementById('clear-cart')?.addEventListener('click', () => this.clearCart());
+        document.getElementById('finalizar-pedido')?.addEventListener('click', () => this.openCustomerModal());
+
+        // Modal de personalização
+        document.getElementById('add-customized')?.addEventListener('click', () => this.addCustomizedToCart());
+
+        // Modal do cliente
+        document.getElementById('customer-form')?.addEventListener('submit', (e) => this.submitOrder(e));
+        document.getElementById('buscar-cep')?.addEventListener('click', () => this.searchCEP());
+
+        // Máscara para telefone e CEP
+        this.setupInputMasks();
+
+        // Fechar modais clicando fora
+        this.setupModalCloseEvents();
+    }
+
+    // Configurar máscaras de entrada
+    setupInputMasks() {
+        const phoneInput = document.getElementById('customer-phone');
+        const cepInput = document.getElementById('customer-cep');
+
+        phoneInput?.addEventListener('input', (e) => {
+            let value = e.target.value.replace(/\D/g, '');
+            value = value.replace(/(\d{2})(\d)/, '($1) $2');
+            value = value.replace(/(\d{4,5})(\d{4})$/, '$1-$2');
+            e.target.value = value;
+        });
+
+        cepInput?.addEventListener('input', (e) => {
+            let value = e.target.value.replace(/\D/g, '');
+            value = value.replace(/(\d{5})(\d)/, '$1-$2');
+            e.target.value = value;
+        });
+    }
+
+    // Configurar eventos de fechar modal
+    setupModalCloseEvents() {
+        document.addEventListener('click', (e) => {
+            if (e.target.classList.contains('modal')) {
+                this.closeAllModals();
             }
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                this.closeAllModals();
+            }
+        });
+    }
+
+    // Configurar efeitos de scroll
+    setupScrollEffects() {
+        const scrollTopBtn = document.querySelector('.scroll-top');
+        const floatingCart = document.getElementById('floating-cart');
+
+        window.addEventListener('scroll', () => {
+            const scrollY = window.scrollY;
+            
+            // Botão scroll to top
+            if (scrollTopBtn) {
+                scrollTopBtn.classList.toggle('visible', scrollY > 300);
+            }
+
+            // Carrinho flutuante
+            if (floatingCart && this.cart.length > 0) {
+                floatingCart.classList.toggle('visible', scrollY > 500);
+            }
+        });
+    }
+
+    // Esconder loading
+    hideLoading() {
+        setTimeout(() => {
+            const loading = document.getElementById('loading-overlay');
+            if (loading) {
+                loading.classList.add('hidden');
+                setTimeout(() => loading.style.display = 'none', 300);
+            }
+        }, 1000);
+    }
+
+    // Renderizar menus
+    renderMenus() {
+        this.renderSandwiches();
+        this.renderDrinks();
+        this.renderSides();
+    }
+
+    // Renderizar sanduíches
+    renderSandwiches() {
+        const container = document.getElementById('sandwiches-menu');
+        if (!container) return;
+
+        const sandwiches = getProductsByCategory('sandwiches');
+        container.innerHTML = '';
+
+        Object.values(sandwiches).forEach(product => {
+            const productEl = this.createSandwichElement(product);
+            container.appendChild(productEl);
+        });
+    }
+
+    // Renderizar bebidas
+    renderDrinks() {
+        const container = document.getElementById('drinks-menu');
+        if (!container) return;
+
+        const drinks = getProductsByCategory('drinks');
+        container.innerHTML = '';
+
+        Object.values(drinks).forEach(product => {
+            const productEl = this.createSimpleItemElement(product);
+            container.appendChild(productEl);
+        });
+    }
+
+    // Renderizar acompanhamentos
+    renderSides() {
+        const container = document.getElementById('sides-menu');
+        if (!container) return;
+
+        const sides = getProductsByCategory('sides');
+        container.innerHTML = '';
+
+        Object.values(sides).forEach(product => {
+            const productEl = this.createSimpleItemElement(product);
+            container.appendChild(productEl);
+        });
+    }
+
+    // Criar elemento de sanduíche
+    createSandwichElement(product) {
+        const div = document.createElement('div');
+        div.className = `menu-item ${product.badges?.includes('featured') ? 'featured' : ''}`;
+        
+        const badges = product.badges?.map(badge => 
+            `<span class="item-badge ${badge}">${this.getBadgeText(badge)}</span>`
+        ).join('') || '';
+
+        const features = product.features?.map(feature => 
+            `<span><i class="fas fa-${this.getFeatureIcon(feature)}"></i> ${feature}</span>`
+        ).join('') || '';
+
+        div.innerHTML = `
+            <div class="item-image-container">
+                <img src="${product.image}" alt="${product.name}" class="item-image">
+                <div class="item-overlay">
+                    <button class="quick-add" data-product="${product.id}">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="item-badges">${badges}</div>
+            <div class="item-content">
+                <h3 class="item-title">${product.name}</h3>
+                <p class="item-description">${product.description}</p>
+                <div class="item-details">
+                    <div class="item-features">${features}</div>
+                    <div class="item-rating">
+                        <span class="stars">${'★'.repeat(5)}</span>
+                        <span class="rating-count">(${product.reviews})</span>
+                    </div>
+                </div>
+                <div class="item-price-section">
+                    <div class="item-price">
+                        ${formatPrice(product.price)}
+                        ${product.originalPrice ? `<span class="original-price">${formatPrice(product.originalPrice)}</span>` : ''}
+                    </div>
+                    <div class="item-actions">
+                        ${product.customizable ? `<button class="customize-btn" data-product="${product.id}"><i class="fas fa-cogs"></i> Personalizar</button>` : ''}
+                        <button class="add-to-cart-direct" data-product="${product.id}">Adicionar</button>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        // Event listeners
+        const quickAdd = div.querySelector('.quick-add');
+        const customizeBtn = div.querySelector('.customize-btn');
+        const addBtn = div.querySelector('.add-to-cart-direct');
+
+        quickAdd?.addEventListener('click', () => this.addToCart(product.id));
+        customizeBtn?.addEventListener('click', () => this.openCustomizeModal(product.id));
+        addBtn?.addEventListener('click', () => this.addToCart(product.id));
+
+        return div;
+    }
+
+    // Criar elemento simples (bebidas/acompanhamentos)
+    createSimpleItemElement(product) {
+        const div = document.createElement('div');
+        div.className = 'simple-item';
+
+        div.innerHTML = `
+            <div class="simple-image">
+                <img src="${product.image}" alt="${product.name}">
+            </div>
+            <div class="simple-item-info">
+                <h4>${product.name}</h4>
+                <p>${product.description}</p>
+                <span class="simple-price">${formatPrice(product.price)}</span>
+            </div>
+            <div class="simple-actions">
+                <div class="quantity">
+                    <button class="qty-btn" data-product="${product.id}" data-action="decrease">-</button>
+                    <span class="qty-value" id="qty-${product.id}">0</span>
+                    <button class="qty-btn" data-product="${product.id}" data-action="increase">+</button>
+                </div>
+                <button class="add-to-cart" data-product="${product.id}">Adicionar</button>
+            </div>
+        `;
+
+        // Event listeners
+        const decreaseBtn = div.querySelector('[data-action="decrease"]');
+        const increaseBtn = div.querySelector('[data-action="increase"]');
+        const addBtn = div.querySelector('.add-to-cart');
+
+        decreaseBtn?.addEventListener('click', () => this.updateQuantity(product.id, -1));
+        increaseBtn?.addEventListener('click', () => this.updateQuantity(product.id, 1));
+        addBtn?.addEventListener('click', () => this.addToCart(product.id));
+
+        return div;
+    }
+
+    // Atualizar quantidade
+    updateQuantity(productId, change) {
+        const qtyElement = document.getElementById(`qty-${productId}`);
+        if (!qtyElement) return;
+
+        let currentQty = parseInt(qtyElement.textContent) || 0;
+        currentQty = Math.max(0, currentQty + change);
+        qtyElement.textContent = currentQty;
+
+        // Atualizar estado do botão de diminuir
+        const decreaseBtn = qtyElement.parentElement.querySelector('[data-action="decrease"]');
+        if (decreaseBtn) {
+            decreaseBtn.disabled = currentQty === 0;
         }
-    });
-});
+    }
 
-// Event Listeners
-function initializeEventListeners() {
-    // Botões de delivery/local
-    document.getElementById('local-btn').addEventListener('click', () => toggleDeliveryOption(false));
-    document.getElementById('viagem-btn').addEventListener('click', () => toggleDeliveryOption(true));
+    // Adicionar ao carrinho
+    addToCart(productId, customizations = null) {
+        const product = getProductById(productId);
+        if (!product) return;
 
-    // Botões de quantidade (bebidas e porções)
-    document.querySelectorAll('.qty-btn').forEach(button => {
-        button.addEventListener('click', function() {
-            const productId = this.dataset.product;
-            const action = this.dataset.action;
-            updateQuantity(productId, action === 'increase' ? 1 : -1);
+        const quantity = this.getProductQuantity(productId);
+        
+        if (quantity === 0 && !customizations) {
+            this.updateQuantity(productId, 1);
+        }
+
+        const cartItem = {
+            id: Date.now(),
+            productId,
+            name: product.name,
+            description: product.description,
+            price: product.price,
+            image: product.image,
+            quantity: customizations ? 1 : Math.max(1, quantity),
+            customizations: customizations || {},
+            notes: customizations?.notes || '',
+            total: this.calculateItemTotal(product.price, customizations)
+        };
+
+        this.cart.push(cartItem);
+        this.saveToStorage('cart', this.cart);
+        this.updateCartUI();
+        this.resetProductQuantity(productId);
+        this.showToast(`${product.name} adicionado ao carrinho!`);
+    }
+
+    // Obter quantidade do produto
+    getProductQuantity(productId) {
+        const qtyElement = document.getElementById(`qty-${productId}`);
+        return qtyElement ? parseInt(qtyElement.textContent) || 0 : 1;
+    }
+
+    // Resetar quantidade do produto
+    resetProductQuantity(productId) {
+        const qtyElement = document.getElementById(`qty-${productId}`);
+        if (qtyElement) {
+            qtyElement.textContent = '0';
+            const decreaseBtn = qtyElement.parentElement?.querySelector('[data-action="decrease"]');
+            if (decreaseBtn) decreaseBtn.disabled = true;
+        }
+    }
+
+    // Calcular total do item
+    calculateItemTotal(basePrice, customizations) {
+        let total = basePrice;
+        
+        if (customizations?.additionals) {
+            Object.keys(customizations.additionals).forEach(additionalId => {
+                const additional = ADDITIONALS[additionalId];
+                if (additional) {
+                    total += additional.price;
+                }
+            });
+        }
+
+        return total;
+    }
+
+    // Abrir modal de personalização
+    openCustomizeModal(productId) {
+        const product = getProductById(productId);
+        if (!product) return;
+
+        this.currentCustomizeProduct = product;
+        
+        // Atualizar título
+        document.getElementById('customize-title').textContent = `Personalizar ${product.name}`;
+        
+        // Mostrar info do produto base
+        document.getElementById('base-product-info').innerHTML = `
+            <div style="display: flex; gap: 15px; align-items: center; padding: 15px; background: var(--bg-light); border-radius: var(--border-radius);">
+                <img src="${product.image}" alt="${product.name}" style="width: 60px; height: 60px; border-radius: 8px; object-fit: cover;">
+                <div>
+                    <h4 style="margin: 0; color: var(--text-dark);">${product.name}</h4>
+                    <p style="margin: 5px 0; color: var(--text-light); font-size: 0.9rem;">${product.description}</p>
+                    <strong style="color: var(--primary-color);">${formatPrice(product.price)}</strong>
+                </div>
+            </div>
+        `;
+
+        // Renderizar adicionais
+        this.renderAdditionals();
+        
+        // Limpar observações
+        document.getElementById('item-notes').value = '';
+        
+        // Atualizar total
+        this.updateCustomizeTotal();
+        
+        // Mostrar modal
+        document.getElementById('customize-modal').classList.add('active');
+    }
+
+    // Renderizar adicionais
+    renderAdditionals() {
+        const container = document.getElementById('additionals-grid');
+        if (!container) return;
+
+        container.innerHTML = '';
+
+        Object.values(ADDITIONALS).forEach(additional => {
+            const label = document.createElement('label');
+            label.className = 'additional-item';
+            
+            label.innerHTML = `
+                <input type="checkbox" name="additional" value="${additional.id}" data-price="${additional.price}">
+                <span class="checkmark"></span>
+                <div class="additional-info">
+                    <span class="additional-name">${additional.name}</span>
+                    <span class="additional-description">${additional.description}</span>
+                </div>
+                <span class="additional-price">+ ${formatPrice(additional.price)}</span>
+            `;
+
+            // Event listener para atualizar total
+            const checkbox = label.querySelector('input');
+            checkbox.addEventListener('change', () => this.updateCustomizeTotal());
+
+            container.appendChild(label);
         });
-    });
+    }
 
-    // Botões adicionar direto (bebidas e porções)
-    document.querySelectorAll('.add-to-cart').forEach(button => {
-        button.addEventListener('click', function() {
-            const productId = this.dataset.product;
-            addToCartDirect(productId);
+    // Atualizar total da personalização
+    updateCustomizeTotal() {
+        if (!this.currentCustomizeProduct) return;
+
+        let total = this.currentCustomizeProduct.price;
+        
+        const checkboxes = document.querySelectorAll('#additionals-grid input[type="checkbox"]:checked');
+        checkboxes.forEach(checkbox => {
+            total += parseFloat(checkbox.dataset.price);
         });
-    });
 
-    // Botões adicionar direto (lanches sem personalização)
-    document.querySelectorAll('.add-to-cart-direct').forEach(button => {
-        button.addEventListener('click', function() {
-            const productId = this.dataset.product;
-            addToCartDirect(productId);
+        document.getElementById('customize-total-value').textContent = formatPrice(total);
+    }
+
+    // Adicionar personalizado ao carrinho
+    addCustomizedToCart() {
+        if (!this.currentCustomizeProduct) return;
+
+        const additionals = {};
+        const checkboxes = document.querySelectorAll('#additionals-grid input[type="checkbox"]:checked');
+        
+        checkboxes.forEach(checkbox => {
+            additionals[checkbox.value] = true;
         });
-    });
 
-    // Botões personalizar (lanches)
-    document.querySelectorAll('.customize-btn').forEach(button => {
-        button.addEventListener('click', function() {
-            const productId = this.dataset.product;
-            openCustomizeModal(productId);
-        });
-    });
+        const notes = document.getElementById('item-notes').value.trim();
 
-    // Modal de personalização
-    document.getElementById('cancel-customize').addEventListener('click', closeCustomizeModal);
-    document.getElementById('add-customized').addEventListener('click', addCustomizedToCart);
-    
-    // Adicionar listeners para adicionais
-    document.querySelectorAll('input[name="additional"]').forEach(input => {
-        input.addEventListener('change', updateCustomizeTotal);
-    });
+        const customizations = {
+            additionals,
+            notes
+        };
 
-    // Modal do cliente
-    document.getElementById('finalizar-pedido').addEventListener('click', finalizarPedido);
-    document.getElementById('buscar-cep').addEventListener('click', buscarCep);
-    document.getElementById('cancelar-pedido').addEventListener('click', closeCustomerModal);
-    document.getElementById('enviar-whatsapp').addEventListener('click', enviarPedidoWhatsApp);
+        this.addToCart(this.currentCustomizeProduct.id, customizations);
+        this.closeCustomizeModal();
+    }
 
-    // Formatação de campos
-    document.getElementById('customer-cep').addEventListener('input', formatarCep);
-    document.getElementById('customer-phone').addEventListener('input', formatarTelefone);
-}
+    // Fechar modal de personalização
+    closeCustomizeModal() {
+        document.getElementById('customize-modal').classList.remove('active');
+        this.currentCustomizeProduct = null;
+    }
 
-// Alternar opção de delivery
-function toggleDeliveryOption(delivery) {
-    isDelivery = delivery;
-    
-    document.getElementById('local-btn').classList.toggle('active', !delivery);
-    document.getElementById('viagem-btn').classList.toggle('active', delivery);
-    
-    updateCartDisplay();
-}
+    // Remover item do carrinho
+    removeFromCart(itemId) {
+        this.cart = this.cart.filter(item => item.id !== itemId);
+        this.saveToStorage('cart', this.cart);
+        this.updateCartUI();
+        this.showToast('Item removido do carrinho');
+    }
 
-// Atualizar quantidade
-function updateQuantity(productId, change) {
-    const qtyElement = document.getElementById(`qty-${productId}`);
-    let quantity = parseInt(qtyElement.textContent);
-    quantity += change;
-    
-    if (quantity < 0) quantity = 0;
-    
-    qtyElement.textContent = quantity;
-}
+    // Limpar carrinho
+    clearCart() {
+        if (this.cart.length === 0) return;
+        
+        if (confirm('Tem certeza que deseja limpar o carrinho?')) {
+            this.cart = [];
+            this.saveToStorage('cart', this.cart);
+            this.updateCartUI();
+            this.showToast('Carrinho limpo');
+        }
+    }
 
-// Adicionar ao carrinho direto (sem personalização)
-function addToCartDirect(productId) {
-    const product = PRODUCTS[productId];
-    if (!product) return;
+    // Atualizar UI do carrinho
+    updateCartUI() {
+        this.updateCartItems();
+        this.updateCartSummary();
+        this.updateFloatingCart();
+        this.updateCartHeader();
+    }
 
-    // Para bebidas e porções, usar a quantidade selecionada
-    let quantity = 1;
-    const qtyElement = document.getElementById(`qty-${productId}`);
-    if (qtyElement) {
-        quantity = parseInt(qtyElement.textContent);
-        if (quantity <= 0) {
-            alert('Selecione uma quantidade antes de adicionar.');
+    // Atualizar itens do carrinho
+    updateCartItems() {
+        const container = document.getElementById('cart-items');
+        if (!container) return;
+
+        if (this.cart.length === 0) {
+            container.innerHTML = `
+                <div class="empty-cart">
+                    <i class="fas fa-shopping-cart"></i>
+                    <h3>Seu carrinho está vazio</h3>
+                    <p>Adicione alguns de nossos deliciosos sanduíches!</p>
+                </div>
+            `;
             return;
         }
-        qtyElement.textContent = '0'; // Resetar
+
+        container.innerHTML = '';
+
+        this.cart.forEach(item => {
+            const div = document.createElement('div');
+            div.className = 'cart-item';
+
+            const additionalsHtml = item.customizations?.additionals ? 
+                Object.keys(item.customizations.additionals)
+                    .map(id => `<span class="additional-tag">${ADDITIONALS[id]?.name}</span>`)
+                    .join('') : '';
+
+            div.innerHTML = `
+                <div class="cart-item-image">
+                    <img src="${item.image}" alt="${item.name}">
+                </div>
+                <div class="cart-item-details">
+                    <div class="cart-item-name">${item.name}</div>
+                    <div class="cart-item-description">${item.description}</div>
+                    ${additionalsHtml ? `<div class="cart-item-additionals">${additionalsHtml}</div>` : ''}
+                    ${item.notes ? `<div class="cart-item-notes">"${item.notes}"</div>` : ''}
+                </div>
+                <div class="cart-item-controls">
+                    <div class="quantity">
+                        <button class="qty-btn" onclick="app.updateCartItemQuantity(${item.id}, -1)">-</button>
+                        <span class="qty-value">${item.quantity}</span>
+                        <button class="qty-btn" onclick="app.updateCartItemQuantity(${item.id}, 1)">+</button>
+                    </div>
+                    <div class="cart-item-price">${formatPrice(item.total * item.quantity)}</div>
+                    <button class="remove-item" onclick="app.removeFromCart(${item.id})">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            `;
+
+            container.appendChild(div);
+        });
     }
 
-    addItemToCart(productId, quantity);
-}
+    // Atualizar quantidade de item do carrinho
+    updateCartItemQuantity(itemId, change) {
+        const item = this.cart.find(item => item.id === itemId);
+        if (!item) return;
 
-// Adicionar item ao carrinho (função genérica)
-function addItemToCart(productId, quantity = 1, additionals = [], notes = '') {
-    const product = PRODUCTS[productId];
-    if (!product) return;
+        item.quantity = Math.max(1, item.quantity + change);
+        this.saveToStorage('cart', this.cart);
+        this.updateCartUI();
+    }
 
-    const itemId = generateItemId(productId, additionals);
-    
-    if (cart[itemId]) {
-        cart[itemId].quantity += quantity;
-    } else {
-        let totalPrice = product.price;
-        let additionalsInfo = [];
-        
-        // Calcular preço dos adicionais
-        additionals.forEach(additionalId => {
-            const additional = ADDITIONALS[additionalId];
-            if (additional) {
-                totalPrice += additional.price;
-                additionalsInfo.push(additional.name);
-            }
+    // Atualizar resumo do carrinho
+    updateCartSummary() {
+        const container = document.getElementById('cart-summary');
+        if (!container) return;
+
+        if (this.cart.length === 0) {
+            container.style.display = 'none';
+            return;
+        }
+
+        container.style.display = 'block';
+
+        const subtotal = this.calculateSubtotal();
+        let deliveryFeeHtml = '';
+
+        if (this.deliveryMode === 'delivery') {
+            const fee = this.deliveryFee;
+            
+            deliveryFeeHtml = `
+                <div class="summary-line delivery-fee">
+                    <span>Taxa de Entrega:</span>
+                    <span>${formatPrice(fee)}</span>
+                </div>
+            `;
+        }
+
+        const total = subtotal + (this.deliveryMode === 'delivery' ? this.deliveryFee : 0);
+
+        container.innerHTML = `
+            <div class="summary-line">
+                <span>Subtotal:</span>
+                <span>${formatPrice(subtotal)}</span>
+            </div>
+            ${deliveryFeeHtml}
+            <div class="summary-line total">
+                <span>Total:</span>
+                <span>${formatPrice(total)}</span>
+            </div>
+        `;
+    }
+
+    // Calcular subtotal
+    calculateSubtotal() {
+        return this.cart.reduce((sum, item) => sum + (item.total * item.quantity), 0);
+    }
+
+    // Atualizar carrinho flutuante
+    updateFloatingCart() {
+        const floatingCart = document.getElementById('floating-cart');
+        const countEl = document.getElementById('floating-cart-count');
+        const textEl = document.getElementById('floating-items-text');
+        const totalEl = document.getElementById('floating-total');
+
+        if (!floatingCart) return;
+
+        const itemCount = this.cart.reduce((sum, item) => sum + item.quantity, 0);
+        const total = this.calculateSubtotal() + (this.deliveryMode === 'delivery' ? this.deliveryFee : 0);
+
+        countEl.textContent = itemCount;
+        textEl.textContent = itemCount === 0 ? 'Carrinho vazio' : `${itemCount} ${itemCount === 1 ? 'item' : 'itens'}`;
+        totalEl.textContent = formatPrice(total);
+
+        floatingCart.style.display = itemCount > 0 ? 'block' : 'none';
+    }
+
+    // Atualizar cabeçalho do carrinho
+    updateCartHeader() {
+        const countEl = document.getElementById('cart-count-header');
+        const clearBtn = document.getElementById('clear-cart');
+
+        if (countEl) {
+            const itemCount = this.cart.reduce((sum, item) => sum + item.quantity, 0);
+            countEl.textContent = `${itemCount} ${itemCount === 1 ? 'item' : 'itens'}`;
+        }
+
+        if (clearBtn) {
+            clearBtn.style.display = this.cart.length > 0 ? 'block' : 'none';
+        }
+    }
+
+    // Definir modo de entrega
+    setDeliveryMode(mode) {
+        this.deliveryMode = mode;
+        this.saveToStorage('deliveryMode', mode);
+        this.updateDeliveryMode();
+        this.updateCartUI();
+    }
+
+    // Atualizar modo de entrega
+    updateDeliveryMode() {
+        const localBtn = document.getElementById('local-btn');
+        const deliveryBtn = document.getElementById('viagem-btn');
+
+        if (localBtn && deliveryBtn) {
+            localBtn.classList.toggle('active', this.deliveryMode === 'local');
+            deliveryBtn.classList.toggle('active', this.deliveryMode === 'delivery');
+        }
+    }
+
+    // Abrir modal do cliente
+    openCustomerModal() {
+        if (this.cart.length === 0) {
+            this.showToast('Adicione itens ao carrinho primeiro!');
+            return;
+        }
+
+        const modal = document.getElementById('customer-modal');
+        const title = document.getElementById('modal-title');
+        const instructions = document.getElementById('local-instructions');
+        const deliveryFields = document.getElementById('delivery-fields');
+
+        if (this.deliveryMode === 'local') {
+            title.textContent = 'Informações para Retirada';
+            instructions.style.display = 'flex';
+            deliveryFields.style.display = 'none';
+        } else {
+            title.textContent = 'Informações para Entrega';
+            instructions.style.display = 'none';
+            deliveryFields.style.display = 'block';
+        }
+
+        modal.classList.add('active');
+    }
+
+    // Fechar modal do cliente
+    closeCustomerModal() {
+        document.getElementById('customer-modal').classList.remove('active');
+    }
+
+    // Fechar todos os modais
+    closeAllModals() {
+        document.querySelectorAll('.modal').forEach(modal => {
+            modal.classList.remove('active');
         });
+        this.currentCustomizeProduct = null;
+    }
 
-        cart[itemId] = {
-            productId: productId,
-            name: product.name,
-            basePrice: product.price,
-            totalPrice: totalPrice,
-            quantity: quantity,
-            additionals: additionals,
-            additionalsInfo: additionalsInfo,
-            notes: notes,
-            category: product.category
+    // Buscar CEP
+    async searchCEP() {
+        const cepInput = document.getElementById('customer-cep');
+        const cep = cepInput.value.replace(/\D/g, '');
+        
+        if (cep.length !== 8) {
+            this.showFieldError('cep-error', 'CEP deve ter 8 dígitos');
+            return;
+        }
+
+        const button = document.getElementById('buscar-cep');
+        const originalText = button.innerHTML;
+        button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Buscando...';
+        button.disabled = true;
+
+        try {
+            const response = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+            const data = await response.json();
+
+            if (data.erro) {
+                this.showFieldError('cep-error', 'CEP não encontrado');
+                return;
+            }
+
+            // Preencher campos
+            document.getElementById('customer-address').value = data.logradouro || '';
+            document.getElementById('customer-neighborhood').value = data.bairro || '';
+            document.getElementById('customer-city').value = data.localidade || '';
+            document.getElementById('customer-state').value = data.uf || '';
+
+            // Mostrar campos de endereço
+            document.getElementById('address-fields').style.display = 'block';
+
+            // Calcular distância e taxa de entrega
+            await this.calculateDeliveryDistance(data);
+
+            this.clearFieldError('cep-error');
+
+        } catch (error) {
+            this.showFieldError('cep-error', 'Erro ao buscar CEP. Tente novamente.');
+        } finally {
+            button.innerHTML = originalText;
+            button.disabled = false;
+        }
+    }
+
+    // Calcular distância de entrega
+    async calculateDeliveryDistance(addressData) {
+        try {
+            // Aqui você pode usar uma API de geocoding como Google Maps
+            // Para este exemplo, vou simular uma distância baseada no bairro
+            const distance = this.simulateDistance(addressData.localidade);
+            
+            const fee = calculateDeliveryFee(distance);
+            
+            if (fee === null) {
+                this.showDeliveryDistance('Área fora de entrega', 'error');
+                this.deliveryFee = 0;
+                return;
+            }
+
+            this.deliveryFee = fee;
+            
+            this.showDeliveryDistance(
+                `Distância: ~${distance}km | Taxa: ${formatPrice(fee)}`,
+                'info'
+            );
+
+            this.customerAddress = { ...addressData, distance };
+            this.updateCartUI();
+
+        } catch (error) {
+            this.showDeliveryDistance('Erro ao calcular distância', 'error');
+        }
+    }
+
+    // Simular distância (substitua por cálculo real)
+    simulateDistance(city) {
+        const distances = {
+            'São Paulo': Math.random() * 8 + 2,
+            'Osasco': Math.random() * 6 + 3,
+            'Carapicuíba': Math.random() * 4 + 1,
+            'Barueri': Math.random() * 7 + 2,
+            'Cotia': Math.random() * 12 + 5
+        };
+        
+        return Math.round((distances[city] || Math.random() * 15 + 1) * 100) / 100;
+    }
+
+    // Mostrar distância de entrega
+    showDeliveryDistance(message, type) {
+        const container = document.getElementById('delivery-distance');
+        container.innerHTML = `
+            <div class="distance-info ${type}">
+                <i class="fas fa-${type === 'error' ? 'exclamation-triangle' : 'info-circle'}"></i>
+                ${message}
+            </div>
+        `;
+        container.style.display = 'block';
+    }
+
+    // Obter distância de entrega
+    getDeliveryDistance() {
+        return this.customerAddress?.distance || 0;
+    }
+
+    // Submeter pedido
+    async submitOrder(event) {
+        event.preventDefault();
+
+        if (!this.validateForm()) return;
+
+        const formData = this.getFormData();
+        const orderData = this.prepareOrderData(formData);
+        
+        this.sendWhatsAppOrder(orderData);
+    }
+
+    // Validar formulário
+    validateForm() {
+        let isValid = true;
+
+        // Nome
+        const name = document.getElementById('customer-name').value.trim();
+        if (name.length < 3) {
+            this.showFieldError('name-error', 'Nome deve ter pelo menos 3 caracteres');
+            isValid = false;
+        } else {
+            this.clearFieldError('name-error');
+        }
+
+        // Telefone
+        const phone = document.getElementById('customer-phone').value.replace(/\D/g, '');
+        if (phone.length < 10) {
+            this.showFieldError('phone-error', 'Telefone inválido');
+            isValid = false;
+        } else {
+            this.clearFieldError('phone-error');
+        }
+
+        // Validações específicas do delivery
+        if (this.deliveryMode === 'delivery') {
+            const cep = document.getElementById('customer-cep').value.replace(/\D/g, '');
+            const address = document.getElementById('customer-address').value.trim();
+            const number = document.getElementById('customer-number').value.trim();
+
+            if (cep.length !== 8) {
+                this.showFieldError('cep-error', 'CEP é obrigatório');
+                isValid = false;
+            }
+
+            if (!address) {
+                this.showFieldError('address-error', 'Endereço é obrigatório');
+                isValid = false;
+            }
+
+            if (!number) {
+                this.showFieldError('number-error', 'Número é obrigatório');
+                isValid = false;
+            }
+        }
+
+        return isValid;
+    }
+
+    // Obter dados do formulário
+    getFormData() {
+        const formData = {
+            name: document.getElementById('customer-name').value.trim(),
+            phone: document.getElementById('customer-phone').value,
+            notes: document.getElementById('customer-notes').value.trim()
+        };
+
+        if (this.deliveryMode === 'delivery') {
+            formData.address = {
+                cep: document.getElementById('customer-cep').value,
+                street: document.getElementById('customer-address').value.trim(),
+                number: document.getElementById('customer-number').value.trim(),
+                complement: document.getElementById('customer-complement').value.trim(),
+                neighborhood: document.getElementById('customer-neighborhood').value.trim(),
+                city: document.getElementById('customer-city').value.trim(),
+                state: document.getElementById('customer-state').value.trim(),
+                distance: this.getDeliveryDistance()
+            };
+        }
+
+        return formData;
+    }
+
+    // Preparar dados do pedido
+    prepareOrderData(formData) {
+        const subtotal = this.calculateSubtotal();
+        const deliveryFee = this.deliveryMode === 'delivery' ? this.deliveryFee : 0;
+        const total = subtotal + deliveryFee;
+
+        return {
+            customer: formData,
+            deliveryMode: this.deliveryMode,
+            items: this.cart,
+            summary: {
+                subtotal,
+                deliveryFee,
+                total,
+                itemCount: this.cart.reduce((sum, item) => sum + item.quantity, 0)
+            },
+            timestamp: new Date().toLocaleString('pt-BR')
         };
     }
-    
-    updateCartDisplay();
-    updateFloatingCart();
-    showFeedback(`${product.name} adicionado ao carrinho!`);
-}
 
-// Gerar ID único para item (considerando adicionais)
-function generateItemId(productId, additionals = []) {
-    const additionalsStr = additionals.sort().join(',');
-    return `${productId}_${additionalsStr}`;
-}
-
-// Abrir modal de personalização
-function openCustomizeModal(productId) {
-    const product = PRODUCTS[productId];
-    if (!product) return;
-
-    currentCustomizing = productId;
-    
-    // Atualizar título
-    document.getElementById('customize-title').textContent = `Personalizar ${product.name}`;
-    
-    // Mostrar info do produto base
-    document.getElementById('base-product-info').innerHTML = `
-        <div class="base-product-name">${product.name}</div>
-        <div class="base-product-price">R$ ${product.price.toFixed(2)}</div>
-        <div style="font-size: 12px; color: #666; margin-top: 5px;">${product.description}</div>
-    `;
-    
-    // Limpar seleções anteriores
-    document.querySelectorAll('input[name="additional"]').forEach(input => {
-        input.checked = false;
-    });
-    document.getElementById('item-notes').value = '';
-    
-    updateCustomizeTotal();
-    elements.customizeModal.style.display = 'flex';
-}
-
-// Fechar modal de personalização
-function closeCustomizeModal() {
-    elements.customizeModal.style.display = 'none';
-    currentCustomizing = null;
-}
-
-// Atualizar total da personalização
-function updateCustomizeTotal() {
-    if (!currentCustomizing) return;
-    
-    const product = PRODUCTS[currentCustomizing];
-    let total = product.price;
-    
-    document.querySelectorAll('input[name="additional"]:checked').forEach(input => {
-        total += parseFloat(input.dataset.price);
-    });
-    
-    document.getElementById('customize-total-value').textContent = `R$ ${total.toFixed(2)}`;
-}
-
-// Adicionar item personalizado ao carrinho
-function addCustomizedToCart() {
-    if (!currentCustomizing) return;
-    
-    const additionals = [];
-    document.querySelectorAll('input[name="additional"]:checked').forEach(input => {
-        additionals.push(input.value);
-    });
-    
-    const notes = document.getElementById('item-notes').value.trim();
-    
-    addItemToCart(currentCustomizing, 1, additionals, notes);
-    closeCustomizeModal();
-}
-
-// Atualizar exibição do carrinho
-function updateCartDisplay() {
-    elements.cartItems.innerHTML = '';
-    
-    let subtotal = 0;
-    const itemCount = Object.keys(cart).length;
-    
-    if (itemCount === 0) {
-        elements.cartItems.innerHTML = '<div class="empty-cart">Seu carrinho está vazio</div>';
-        elements.deliveryFeeContainer.style.display = 'none';
-        elements.cartTotal.textContent = 'R$ 0,00';
-        return;
-    }
-    
-    // Renderizar itens do carrinho
-    for (const itemId in cart) {
-        const item = cart[itemId];
-        const itemTotal = item.totalPrice * item.quantity;
-        subtotal += itemTotal;
+    // Enviar pedido via WhatsApp
+    sendWhatsAppOrder(orderData) {
+        let message = `🍔 *NOVO PEDIDO - Costela do Titi*\n\n`;
         
-        const cartItemElement = createCartItemElement(itemId, item, itemTotal);
-        elements.cartItems.appendChild(cartItemElement);
-    }
-    
-    // Mostrar informação sobre entrega
-    if (isDelivery && subtotal > 0) {
-        elements.deliveryFeeContainer.style.display = 'block';
-        elements.deliveryFeeValue.textContent = CONFIG.deliveryText;
-    } else {
-        elements.deliveryFeeContainer.style.display = 'none';
-    }
-    
-    // Total mostra apenas o subtotal quando delivery é "a combinar"
-    elements.cartTotal.textContent = `R$ ${subtotal.toFixed(2)}`;
-}
+        // Informações do cliente
+        message += `👤 *Cliente:* ${orderData.customer.name}\n`;
+        message += `📞 *Telefone:* ${orderData.customer.phone}\n`;
+        message += `📋 *Tipo:* ${orderData.deliveryMode === 'local' ? 'Retirar no local' : 'Delivery'}\n\n`;
 
-// Criar elemento do item do carrinho
-function createCartItemElement(itemId, item, itemTotal) {
-    const cartItem = document.createElement('div');
-    cartItem.className = 'cart-item';
-    
-    let additionalsHtml = '';
-    if (item.additionalsInfo && item.additionalsInfo.length > 0) {
-        additionalsHtml = `<div class="cart-item-details">+ ${item.additionalsInfo.join(', ')}</div>`;
-    }
-    
-    let notesHtml = '';
-    if (item.notes) {
-        notesHtml = `<div class="cart-item-details">Obs: ${item.notes}</div>`;
-    }
-    
-    cartItem.innerHTML = `
-        <div class="cart-item-info">
-            <div class="cart-item-name">${item.name}</div>
-            ${additionalsHtml}
-            ${notesHtml}
-            <div class="cart-item-price">R$ ${item.totalPrice.toFixed(2)} cada</div>
-        </div>
-        <div class="cart-item-quantity">
-            <button class="qty-btn cart-qty-btn" data-item="${itemId}" data-action="decrease">-</button>
-            <span>${item.quantity}</span>
-            <button class="qty-btn cart-qty-btn" data-item="${itemId}" data-action="increase">+</button>
-        </div>
-        <div class="cart-item-total">R$ ${itemTotal.toFixed(2)}</div>
-    `;
-    
-    // Adicionar event listeners aos botões de quantidade
-    cartItem.querySelectorAll('.cart-qty-btn').forEach(button => {
-        button.addEventListener('click', function() {
-            const itemId = this.dataset.item;
-            const action = this.dataset.action;
-            changeCartItemQuantity(itemId, action === 'increase' ? 1 : -1);
-        });
-    });
-    
-    return cartItem;
-}
-
-// Alterar quantidade no carrinho
-function changeCartItemQuantity(itemId, change) {
-    if (cart[itemId]) {
-        cart[itemId].quantity += change;
-        
-        if (cart[itemId].quantity <= 0) {
-            delete cart[itemId];
+        // Endereço (se delivery)
+        if (orderData.deliveryMode === 'delivery' && orderData.customer.address) {
+            const addr = orderData.customer.address;
+            message += `📍 *Endereço:*\n`;
+            message += `${addr.street}, ${addr.number}`;
+            if (addr.complement) message += ` - ${addr.complement}`;
+            message += `\n${addr.neighborhood} - ${addr.city}/${addr.state}`;
+            message += `\nCEP: ${addr.cep}\n`;
+            message += `📏 *Distância:* ~${addr.distance}km\n\n`;
         }
-        
-        updateCartDisplay();
-        updateFloatingCart();
-    }
-}
 
-// Atualizar carrinho flutuante
-function updateFloatingCart() {
-    const summary = getCartSummary();
-    
-    if (summary.totalItems === 0) {
-        elements.floatingCart.classList.remove('show');
-        return;
-    }
-    
-    // Mostrar carrinho flutuante
-    elements.floatingCart.classList.add('show');
-    
-    // Atualizar contador
-    elements.floatingCartCount.textContent = summary.totalItems;
-    
-    // Atualizar texto dos itens
-    if (summary.totalItems === 1) {
-        elements.floatingItemsText.textContent = '1 item no carrinho';
-    } else {
-        elements.floatingItemsText.textContent = `${summary.totalItems} itens no carrinho`;
-    }
-    
-    // Atualizar total
-    elements.floatingTotal.textContent = `R$ ${summary.total.toFixed(2)}`;
-    
-    // Animar o contador
-    elements.floatingCartCount.style.animation = 'none';
-    setTimeout(() => {
-        elements.floatingCartCount.style.animation = 'pulse 0.5s ease-in-out';
-    }, 10);
-}
-
-// Scroll suave para o carrinho
-function scrollToCart() {
-    const cartSection = document.querySelector('.cart-section');
-    if (cartSection) {
-        cartSection.scrollIntoView({ 
-            behavior: 'smooth',
-            block: 'center'
-        });
-    }
-}
-
-// Finalizar pedido
-function finalizarPedido() {
-    if (Object.keys(cart).length === 0) {
-        alert('Adicione itens ao carrinho antes de finalizar o pedido.');
-        return;
-    }
-    
-    openCustomerModal();
-}
-
-// Abrir modal do cliente
-function openCustomerModal() {
-    if (isDelivery) {
-        elements.modalTitle.textContent = 'Informações para Entrega';
-        elements.deliveryFields.style.display = 'block';
-        elements.localInstructions.style.display = 'none';
-    } else {
-        elements.modalTitle.textContent = 'Informações para Consumo no Local';
-        elements.deliveryFields.style.display = 'none';
-        elements.localInstructions.style.display = 'block';
-    }
-    
-    elements.customerModal.style.display = 'flex';
-}
-
-// Fechar modal do cliente
-function closeCustomerModal() {
-    elements.customerModal.style.display = 'none';
-}
-
-// Buscar CEP
-function buscarCep() {
-    const cep = document.getElementById('customer-cep').value.replace(/\D/g, '');
-    
-    if (cep.length !== 8) {
-        alert('CEP inválido. Digite um CEP com 8 dígitos.');
-        return;
-    }
-    
-    const cepButton = document.getElementById('buscar-cep');
-    cepButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-    cepButton.disabled = true;
-    
-    fetch(`https://viacep.com.br/ws/${cep}/json/`)
-        .then(response => response.json())
-        .then(data => {
-            if (data.erro) {
-                alert('CEP não encontrado. Preencha o endereço manualmente.');
-                elements.addressFields.style.display = 'block';
-            } else {
-                document.getElementById('customer-address').value = data.logradouro || '';
-                document.getElementById('customer-neighborhood').value = data.bairro || '';
-                document.getElementById('customer-city').value = data.localidade || '';
-                document.getElementById('customer-state').value = data.uf || '';
+        // Itens do pedido
+        message += `🛒 *Itens:*\n`;
+        orderData.items.forEach((item, index) => {
+            message += `${index + 1}. *${item.name}* (${item.quantity}x)\n`;
+            
+            if (item.customizations?.additionals) {
+                const additionals = Object.keys(item.customizations.additionals)
+                    .map(id => ADDITIONALS[id]?.name)
+                    .filter(name => name);
                 
-                elements.addressFields.style.display = 'block';
-                document.getElementById('customer-number').focus();
+                if (additionals.length > 0) {
+                    message += `   + ${additionals.join(', ')}\n`;
+                }
             }
-        })
-        .catch(error => {
-            console.error('Erro ao buscar CEP:', error);
-            alert('Erro ao buscar CEP. Preencha o endereço manualmente.');
-            elements.addressFields.style.display = 'block';
-        })
-        .finally(() => {
-            cepButton.innerHTML = '<i class="fas fa-search"></i>';
-            cepButton.disabled = false;
-        });
-}
-
-// Formatação de CEP
-function formatarCep(e) {
-    let value = e.target.value.replace(/\D/g, '');
-    if (value.length > 5) {
-        value = value.substring(0, 5) + '-' + value.substring(5, 8);
-    }
-    e.target.value = value;
-}
-
-// Formatação de telefone
-function formatarTelefone(e) {
-    let value = e.target.value.replace(/\D/g, '');
-    if (value.length > 0) {
-        value = '(' + value;
-        if (value.length > 3) {
-            value = value.substring(0, 3) + ') ' + value.substring(3);
-        }
-        if (value.length > 10) {
-            value = value.substring(0, 10) + '-' + value.substring(10, 14);
-        }
-    }
-    e.target.value = value;
-}
-
-// Enviar pedido por WhatsApp
-function enviarPedidoWhatsApp() {
-    const name = document.getElementById('customer-name').value.trim();
-    const phone = document.getElementById('customer-phone').value.trim();
-    const notes = document.getElementById('customer-notes').value.trim();
-    
-    if (!name || !phone) {
-        alert('Por favor, preencha pelo menos seu nome e telefone.');
-        return;
-    }
-    
-    if (!validateForm()) return;
-    
-    const message = buildWhatsAppMessage(name, phone, notes);
-    
-    // Enviar para WhatsApp
-    window.open(`https://wa.me/${CONFIG.whatsappNumber}?text=${message}`, '_blank');
-    
-    // Limpar e fechar
-    clearFormAndCart();
-    closeCustomerModal();
-    showFeedback('Pedido enviado com sucesso!', 'success');
-}
-
-// Validar formulário
-function validateForm() {
-    if (isDelivery) {
-        const address = document.getElementById('customer-address').value.trim();
-        const number = document.getElementById('customer-number').value.trim();
-        const neighborhood = document.getElementById('customer-neighborhood').value.trim();
-        const city = document.getElementById('customer-city').value.trim();
-        const state = document.getElementById('customer-state').value.trim();
-        
-        if (!address || !number || !neighborhood || !city || !state) {
-            alert('Para delivery, é necessário informar o endereço completo.');
-            return false;
-        }
-    }
-    return true;
-}
-
-// Construir mensagem do WhatsApp
-function buildWhatsAppMessage(name, phone, notes) {
-    const orderType = isDelivery ? 'Delivery' : 'Retirada';
-    let message = `*NOVO PEDIDO - Costela do Titi*%0A%0A`;
-    message += `*Cliente:* ${name}%0A`;
-    message += `*Telefone:* ${phone}%0A`;
-    message += `*Tipo:* ${orderType}%0A%0A`;
-    
-    // Endereço para delivery
-    if (isDelivery) {
-        const address = document.getElementById('customer-address').value.trim();
-        const number = document.getElementById('customer-number').value.trim();
-        const complement = document.getElementById('customer-complement').value.trim();
-        const neighborhood = document.getElementById('customer-neighborhood').value.trim();
-        const city = document.getElementById('customer-city').value.trim();
-        const state = document.getElementById('customer-state').value.trim();
-        
-        message += `*Endereço:* ${address}, ${number}`;
-        if (complement) message += `, ${complement}`;
-        message += ` - ${neighborhood}, ${city}-${state}%0A%0A`;
-    }
-    
-    // Itens do pedido por categoria
-    message += `*ITENS DO PEDIDO:*%0A%0A`;
-    
-    const categories = {
-        'lanche': '🍔 *LANCHES*',
-        'bebida': '🥤 *BEBIDAS*',
-        'porcao': '🍟 *PORÇÕES*'
-    };
-    
-    let subtotal = 0;
-    
-    // Agrupar por categoria
-    const itemsByCategory = {};
-    for (const itemId in cart) {
-        const item = cart[itemId];
-        const category = item.category || 'outros';
-        
-        if (!itemsByCategory[category]) {
-            itemsByCategory[category] = [];
-        }
-        itemsByCategory[category].push({ itemId, ...item });
-    }
-    
-    // Exibir itens por categoria
-    Object.keys(itemsByCategory).forEach(category => {
-        if (categories[category]) {
-            message += `${categories[category]}%0A`;
-        }
-        
-        itemsByCategory[category].forEach(item => {
-            const itemTotal = item.totalPrice * item.quantity;
-            subtotal += itemTotal;
-            
-            message += `• ${item.quantity}x ${item.name}`;
-            
-            if (item.additionalsInfo && item.additionalsInfo.length > 0) {
-                message += ` (+ ${item.additionalsInfo.join(', ')})`;
-            }
-            
-            message += ` - R$ ${itemTotal.toFixed(2)}`;
             
             if (item.notes) {
-                message += `%0A  _Obs: ${item.notes}_`;
+                message += `   💬 "${item.notes}"\n`;
             }
             
-            message += `%0A`;
+            message += `   💰 ${formatPrice(item.total * item.quantity)}\n\n`;
         });
+
+        // Resumo financeiro
+        message += `💵 *Resumo:*\n`;
+        message += `Subtotal: ${formatPrice(orderData.summary.subtotal)}\n`;
         
-        message += `%0A`;
-    });
-    
-    // Informação sobre entrega
-    if (isDelivery) {
-        message += `🚚 *Taxa de entrega: ${CONFIG.deliveryText}*%0A%0A`;
-    }
-    
-    // Total (subtotal quando entrega é a combinar)
-    message += `💰 *SUBTOTAL: R$ ${subtotal.toFixed(2)}*%0A`;
-    if (isDelivery) {
-        message += `💰 *TOTAL: A calcular com a taxa de entrega*%0A%0A`;
-    } else {
-        message += `%0A`;
-    }
-    
-    // Observações gerais
-    if (notes) {
-        message += `📝 *Observações:* ${notes}%0A%0A`;
-    }
-    
-    // Instruções finais
-    if (isDelivery) {
-        message += `🚚 *Delivery* - Tempo estimado: 30-45 minutos%0A`;
-        message += `Entraremos em contato para confirmar o pedido e informar o valor da entrega!%0A%0A`;
-    } else {
-        message += `🏪 *Retirada no Local* - Tempo estimado: ${CONFIG.prepareTime} minutos%0A`;
-        message += `Avisaremos quando estiver pronto para retirada!%0A%0A`;
-    }
-    
-    message += `_Pedido realizado via site_`;
-    
-    return message;
-}
+        if (orderData.deliveryMode === 'delivery') {
+            message += `Taxa de entrega: ${formatPrice(orderData.summary.deliveryFee)}\n`;
+        }
+        
+        message += `*Total: ${formatPrice(orderData.summary.total)}*\n\n`;
 
-// Limpar formulário e carrinho
-function clearFormAndCart() {
-    // Limpar carrinho
-    cart = {};
-    
-    // Limpar formulário
-    document.getElementById('customer-name').value = '';
-    document.getElementById('customer-phone').value = '';
-    document.getElementById('customer-cep').value = '';
-    document.getElementById('customer-address').value = '';
-    document.getElementById('customer-number').value = '';
-    document.getElementById('customer-complement').value = '';
-    document.getElementById('customer-neighborhood').value = '';
-    document.getElementById('customer-city').value = '';
-    document.getElementById('customer-state').value = '';
-    document.getElementById('customer-notes').value = '';
-    
-    // Resetar quantidades dos produtos
-    document.querySelectorAll('.qty-value').forEach(element => {
-        element.textContent = '0';
-    });
-    
-    // Esconder campos de endereço
-    elements.addressFields.style.display = 'none';
-    
-    // Atualizar display do carrinho
-    updateCartDisplay();
-    updateFloatingCart();
-}
+        // Observações
+        if (orderData.customer.notes) {
+            message += `📝 *Observações:*\n${orderData.customer.notes}\n\n`;
+        }
 
-// Mostrar feedback para o usuário
-function showFeedback(message, type = 'info') {
-    // Remover feedback anterior se existir
-    const existingFeedback = document.querySelector('.feedback-message');
-    if (existingFeedback) {
-        existingFeedback.remove();
+        message += `🕐 *Pedido realizado em:* ${orderData.timestamp}`;
+
+        // Codificar e enviar
+        const encodedMessage = encodeURIComponent(message);
+        const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodedMessage}`;
+        
+        window.open(whatsappUrl, '_blank');
+
+        // Salvar dados do cliente e limpar carrinho
+        this.saveCustomerData(orderData.customer);
+        this.showOrderSuccess();
     }
-    
-    // Criar novo feedback
-    const feedback = document.createElement('div');
-    feedback.className = `feedback-message feedback-${type}`;
-    feedback.innerHTML = `
-        <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-info-circle'}"></i>
-        <span>${message}</span>
-    `;
-    
-    // Estilos inline para o feedback
-    Object.assign(feedback.style, {
-        position: 'fixed',
-        top: '20px',
-        right: '20px',
-        background: type === 'success' ? '#28a745' : '#007bff',
-        color: 'white',
-        padding: '15px 20px',
-        borderRadius: '8px',
-        boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-        zIndex: '9999',
-        display: 'flex',
-        alignItems: 'center',
-        gap: '10px',
-        fontSize: '14px',
-        fontWeight: '500',
-        maxWidth: '300px',
-        transform: 'translateX(100%)',
-        transition: 'transform 0.3s ease-in-out'
-    });
-    
-    document.body.appendChild(feedback);
-    
-    // Animação de entrada
-    requestAnimationFrame(() => {
-        feedback.style.transform = 'translateX(0)';
-    });
-    
-    // Remover após 3 segundos
-    setTimeout(() => {
-        feedback.style.transform = 'translateX(100%)';
+
+    // Salvar dados do cliente
+    saveCustomerData(customerData) {
+        this.customerData = customerData;
+        this.saveToStorage('customerData', customerData);
+    }
+
+    // Mostrar sucesso do pedido
+    showOrderSuccess() {
+        this.closeAllModals();
+        
+        // Limpar carrinho após alguns segundos
         setTimeout(() => {
-            if (feedback.parentNode) {
-                feedback.remove();
-            }
-        }, 300);
-    }, 3000);
-}
-
-// Função para calcular resumo do carrinho
-function getCartSummary() {
-    const summary = {
-        itemCount: 0,
-        totalItems: 0,
-        subtotal: 0,
-        deliveryFee: 0, // Sempre 0 quando é "a combinar"
-        deliveryText: isDelivery ? CONFIG.deliveryText : '',
-        total: 0
-    };
-    
-    for (const itemId in cart) {
-        const item = cart[itemId];
-        summary.itemCount++;
-        summary.totalItems += item.quantity;
-        summary.subtotal += item.totalPrice * item.quantity;
+            this.cart = [];
+            this.saveToStorage('cart', this.cart);
+            this.updateCartUI();
+            this.showToast('Pedido enviado com sucesso! Obrigado pela preferência!', 'success', 5000);
+        }, 1000);
     }
-    
-    // Total é apenas o subtotal quando entrega é "a combinar"
-    summary.total = summary.subtotal;
-    
-    return summary;
-}
 
-// Função utilitária para debounce
-function debounce(func, wait) {
-    let timeout;
-    return function executedFunction(...args) {
-        const later = () => {
-            clearTimeout(timeout);
-            func(...args);
+    // Mostrar/limpar erros de campo
+    showFieldError(fieldId, message) {
+        const errorEl = document.getElementById(fieldId);
+        if (errorEl) {
+            errorEl.textContent = message;
+            errorEl.style.display = 'block';
+        }
+    }
+
+    clearFieldError(fieldId) {
+        const errorEl = document.getElementById(fieldId);
+        if (errorEl) {
+            errorEl.style.display = 'none';
+        }
+    }
+
+    // Mostrar toast
+    showToast(message, type = 'info', duration = 3000) {
+        // Remover toast anterior se existir
+        const existingToast = document.querySelector('.toast');
+        if (existingToast) {
+            existingToast.remove();
+        }
+
+        const toast = document.createElement('div');
+        toast.className = `toast toast-${type}`;
+        toast.innerHTML = `
+            <i class="fas fa-${this.getToastIcon(type)}"></i>
+            <span>${message}</span>
+        `;
+
+        document.body.appendChild(toast);
+
+        // Mostrar toast
+        setTimeout(() => toast.classList.add('show'), 100);
+
+        // Remover toast
+        setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => toast.remove(), 300);
+        }, duration);
+    }
+
+    // Obter ícone do toast
+    getToastIcon(type) {
+        const icons = {
+            info: 'info-circle',
+            success: 'check-circle',
+            error: 'exclamation-circle',
+            warning: 'exclamation-triangle'
         };
-        clearTimeout(timeout);
-        timeout = setTimeout(later, wait);
-    };
-}
-
-// Função para validar telefone
-function isValidPhone(phone) {
-    const cleanPhone = phone.replace(/\D/g, '');
-    return cleanPhone.length >= 10 && cleanPhone.length <= 11;
-}
-
-// Função para validar nome
-function isValidName(name) {
-    return name.trim().length >= 2;
-}
-
-// Adicionar validação em tempo real
-document.addEventListener('DOMContentLoaded', function() {
-    // Validação de nome
-    const nameInput = document.getElementById('customer-name');
-    if (nameInput) {
-        nameInput.addEventListener('blur', function() {
-            if (!isValidName(this.value)) {
-                this.style.borderColor = '#dc3545';
-                showFeedback('Nome deve ter pelo menos 2 caracteres', 'error');
-            } else {
-                this.style.borderColor = '#28a745';
-            }
-        });
+        return icons[type] || 'info-circle';
     }
-    
-    // Validação de telefone
-    const phoneInput = document.getElementById('customer-phone');
-    if (phoneInput) {
-        phoneInput.addEventListener('blur', function() {
-            if (!isValidPhone(this.value)) {
-                this.style.borderColor = '#dc3545';
-                showFeedback('Digite um telefone válido', 'error');
-            } else {
-                this.style.borderColor = '#28a745';
-            }
-        });
+
+    // Obter texto do badge
+    getBadgeText(badge) {
+        const badges = {
+            popular: 'Mais Pedido',
+            discount: '-20%',
+            bestseller: 'Best Seller',
+            recommended: 'Recomendado',
+            premium: 'Premium',
+            exclusive: 'Exclusivo'
+        };
+        return badges[badge] || badge;
     }
+
+    // Obter ícone da feature
+    getFeatureIcon(feature) {
+        const icons = {
+            'Premium': 'crown',
+            'Defumado': 'fire',
+            'Defumado 12h': 'fire',
+            'Premiado': 'award',
+            'Gourmet': 'gem',
+            'Chef': 'star'
+        };
+        return icons[feature] || 'check';
+    }
+
+    // Salvar no localStorage
+    saveToStorage(key, data) {
+        try {
+            localStorage.setItem(key, JSON.stringify(data));
+        } catch (error) {
+            console.warn('Erro ao salvar no localStorage:', error);
+        }
+    }
+
+    // Carregar do localStorage
+    loadFromStorage(key) {
+        try {
+            const data = localStorage.getItem(key);
+            return data ? JSON.parse(data) : null;
+        } catch (error) {
+            console.warn('Erro ao carregar do localStorage:', error);
+            return null;
+        }
+    }
+}
+
+// Funções globais para compatibilidade
+function scrollToMenu() {
+    document.getElementById('menu')?.scrollIntoView({ behavior: 'smooth' });
+}
+
+function scrollToCart() {
+    document.querySelector('.cart-section')?.scrollIntoView({ behavior: 'smooth' });
+}
+
+function closeCustomizeModal() {
+    window.app?.closeCustomizeModal();
+}
+
+function closeCustomerModal() {
+    window.app?.closeCustomerModal();
+}
+
+// Inicializar app quando DOM estiver carregado
+document.addEventListener('DOMContentLoaded', () => {
+    window.app = new DeliveryApp();
 });
 
-// Função para exportar pedido (para futuras implementações)
-function exportOrder() {
-    const summary = getCartSummary();
-    const orderData = {
-        timestamp: new Date().toISOString(),
-        type: isDelivery ? 'delivery' : 'pickup',
-        items: cart,
-        summary: summary,
-        customer: {
-            name: document.getElementById('customer-name').value,
-            phone: document.getElementById('customer-phone').value,
-            // Adicionar mais campos conforme necessário
-        }
-    };
-    
-    return orderData;
+// CSS adicional para toast (adicionar ao style.css)
+const toastStyles = `
+.toast {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: var(--bg-white);
+    border-radius: var(--border-radius);
+    padding: 15px 20px;
+    box-shadow: var(--shadow-medium);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    z-index: 10000;
+    transform: translateX(400px);
+    transition: var(--transition);
+    border-left: 4px solid var(--primary-color);
 }
 
-// Listener para tecla ESC fechar modais
-document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') {
-        if (elements.customizeModal.style.display === 'flex') {
-            closeCustomizeModal();
-        }
-        if (elements.customerModal.style.display === 'flex') {
-            closeCustomerModal();
-        }
-    }
-});
-
-// Função para smooth scroll (se necessário)
-function scrollToElement(elementId) {
-    const element = document.getElementById(elementId);
-    if (element) {
-        element.scrollIntoView({ 
-            behavior: 'smooth',
-            block: 'start'
-        });
-    }
+.toast.show {
+    transform: translateX(0);
 }
 
-// Console log para debugging (remover em produção)
-if (typeof console !== 'undefined') {
-    console.log('Sistema Costela do Titi carregado com sucesso!');
-    console.log('Produtos disponíveis:', Object.keys(PRODUCTS).length);
-    console.log('Adicionais disponíveis:', Object.keys(ADDITIONALS).length);
+.toast-success {
+    border-left-color: #27ae60;
+    color: #27ae60;
 }
+
+.toast-error {
+    border-left-color: var(--accent-color);
+    color: var(--accent-color);
+}
+
+.toast-warning {
+    border-left-color: #f39c12;
+    color: #f39c12;
+}
+
+.distance-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px;
+    border-radius: var(--border-radius);
+    font-size: 0.9rem;
+}
+
+.distance-info.success {
+    background: rgba(39, 174, 96, 0.1);
+    color: #27ae60;
+    border: 1px solid rgba(39, 174, 96, 0.3);
+}
+
+.distance-info.info {
+    background: rgba(52, 152, 219, 0.1);
+    color: #3498db;
+    border: 1px solid rgba(52, 152, 219, 0.3);
+}
+
+.distance-info.error {
+    background: rgba(231, 76, 60, 0.1);
+    color: #e74c3c;
+    border: 1px solid rgba(231, 76, 60, 0.3);
+}
+`;
+
+// Adicionar estilos do toast
+const styleSheet = document.createElement('style');
+styleSheet.textContent = toastStyles;
+document.head.appendChild(styleSheet);
