@@ -39,7 +39,7 @@ const PRODUCTS = {
             description: "Pão baguete artesanal, Cupim premium 150g, queijo cheddar especial, cebola caramelizada e molho barbecue artesanal.",
             price: 29.90,
             category: "sandwiches",
-            image: "https://images.unsplash.com/photo-1571091718767-18b5b1457add?w=500&h=300&fit=crop&crop=center",
+            image: "images/cupim-premium.jpg",
             badges: ["premium", "exclusive"],
             features: ["Gourmet", "180g", "Chef"],
             rating: 4.9,
