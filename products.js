@@ -9,13 +9,13 @@ const PRODUCTS = {
         casa: {
             id: 'casa',
             name: "Pão da Casa",
-            description: "Pão artesanal, costela desfiada 120g, queijo derretido, alface crocante e banana frita dourada.",
+            description: "Pão artesanal, costela desfiada 100g, queijo derretido, alface crocante e banana frita dourada.",
             price: 20.00,
             originalPrice: 25.00,
             category: "sandwiches",
-            image: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=500&h=300&fit=crop&crop=center",
+            image: "images/pao-da-casa.jpg",
             badges: ["popular", "discount"],
-            features: ["15 min", "Defumado", "120g"],
+            features: ["20 min", "Defumado", "120g"],
             rating: 4.8,
             reviews: 89,
             customizable: true
@@ -23,10 +23,10 @@ const PRODUCTS = {
         titi: {
             id: 'titi',
             name: "Pão do Titi",
-            description: "Pão especial, costela premium 120g, queijo cheddar, bacon crocante, alface, cebola roxa e banana frita.",
+            description: "Pão especial, costela premium 150g, queijo cheddar, bacon crocante, alface, cebola roxa e banana frita.",
             price: 25.00,
             category: "sandwiches",
-            image: "https://images.unsplash.com/photo-1594212699903-ec8a3eca50f5?w=500&h=300&fit=crop&crop=center",
+            image: "images/pao-do-titi.jpg",
             badges: ["bestseller", "recommended"],
             features: ["Premium", "Defumado 12h", "Premiado"],
             rating: 4.9,
@@ -96,7 +96,7 @@ const PRODUCTS = {
             description: "Batata rústica crocante individual",
             price: 10.00,
             category: "sides",
-            image: "https://images.unsplash.com/photo-1630384060421-cb20d0e0649d?w=400&h=300&fit=crop&crop=center",
+            image: "images/batata-150g.jpg",
             customizable: false
         },
         batata_300: {
@@ -105,7 +105,7 @@ const PRODUCTS = {
             description: "Batata rústica crocante para compartilhar",
             price: 15.00,
             category: "sides",
-            image: "https://images.unsplash.com/photo-1573080496219-bb080dd4f877?w=400&h=300&fit=crop&crop=center",
+            image: "images/batata-300g.jpg",
             customizable: false
         }
     }
