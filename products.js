@@ -23,7 +23,7 @@ const PRODUCTS = {
         titi: {
             id: 'titi',
             name: "Pão do Titi",
-            description: "Pão especial, costela premium 150g, queijo mussarela, bacon crocante, alface, cebola roxa e banana frita.",
+            description: "Pão especial, costela premium 150g, queijo, bacon crocante, alface, cebola roxa e banana frita.",
             price: 27.00,
             category: "sandwiches",
             image: "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgdmlld0JveD0iMCAwIDQwMCAzMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjQwMCIgaGVpZ2h0PSIzMDAiIGZpbGw9IiNGNUY1RjUiLz48cGF0aCBkPSJNMjAwIDEwMEM4OS41NDMgMTAwIDAgMTI2LjI4MSAwIDE2MEMwIDE5My43MTkgODkuNTQzIDIyMCAyMDAgMjIwQzMxMC40NTcgMjIwIDQwMCAxOTMuNzE5IDQwMCAxNjBDNDAwIDEyNi4yODEgMzEwLjQ1NyAxMDAgMjAwIDEwMFoiIGZpbGw9IiM4QjQ1MTMiLz48dGV4dCB4PSIyMDAiIHk9IjE2MCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iI0ZGRkZGRiIgZm9udC1zaXplPSIxOCIgZm9udC1mYW1pbHk9IkFyaWFsIj5QQU8gRE8gVElUSTwvdGV4dD48L3N2Zz4=",
@@ -36,12 +36,12 @@ const PRODUCTS = {
         premium: {
             id: 'premium',
             name: "Cupim Premium",
-            description: "Pão baguete artesanal, Cupim premium 150g, queijo mussarela, bacon crocante, alface, cebola roxa e banana frita. .",
+            description: "Pão baguete artesanal, Cupim premium 150g, queijo, bacon crocante, alface, cebola roxa e banana frita.",
             price: 29.90,
             category: "sandwiches",
             image: "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgdmlld0JveD0iMCAwIDQwMCAzMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjQwMCIgaGVpZ2h0PSIzMDAiIGZpbGw9IiNGNUY1RjUiLz48cGF0aCBkPSJNMjAwIDEwMEM4OS41NDMgMTAwIDAgMTI2LjI4MSAwIDE2MEMwIDE5My43MTkgODkuNTQzIDIyMCAyMDAgMjIwQzMxMC40NTcgMjIwIDQwMCAxOTMuNzE5IDQwMCAxNjBDNDAwIDEyNi4yODEgMzEwLjQ1NyAxMDAgMjAwIDEwMFoiIGZpbGw9IiM5QjU5QjYiLz48dGV4dCB4PSIyMDAiIHk9IjE2MCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iI0ZGRkZGRiIgZm9udC1zaXplPSIxOCIgZm9udC1mYW1pbHk9IkFyaWFsIj5DVVBJTSBQUkVNSVVNPC90ZXh0Pjwvc3ZnPg==",
             badges: ["premium", "exclusive"],
-            features: ["Gourmet", "180g", "Chef"],
+            features: ["Gourmet", "150g", "Chef"],
             rating: 4.9,
             reviews: 67,
             customizable: true
@@ -61,92 +61,32 @@ const PRODUCTS = {
         },
         agua_gas: {
             id: 'agua_gas',
-            name: "Água Mineral c/ Gás",
+            name: "Água com Gás",
             description: "Água mineral com gás gelada 500ml",
             price: 4.00,
             category: "drinks",
             image: "https://images.unsplash.com/photo-1523362628745-0c100150b504?w=400&h=300&fit=crop&crop=center",
             customizable: false
         },
-        coca_lata: {
-            id: 'coca_lata',
-            name: "Coca-Cola Lata",
-            description: "Coca-Cola gelada 350ml",
+        refri_lata: {
+            id: 'refri_lata',
+            name: "Refrigerante Lata",
+            description: "Refrigerante gelado 350ml - Escolha o sabor",
             price: 5.00,
             category: "drinks",
             image: "https://images.unsplash.com/photo-1629203851122-3726ecdf080e?w=400&h=300&fit=crop&crop=center",
             customizable: false,
-            flavors: ["Coca-Cola Original"]
+            flavors: ["Lata Coca", "Lata Coca Zero", "Lata Guaraná", "Lata Guaraná Zero", "Lata Fanta"]
         },
-        coca_zero_lata: {
-            id: 'coca_zero_lata',
-            name: "Coca-Cola Zero Lata",
-            description: "Coca-Cola Zero gelada 350ml",
-            price: 5.00,
-            category: "drinks",
-            image: "https://images.unsplash.com/photo-1629203851122-3726ecdf080e?w=400&h=300&fit=crop&crop=center",
-            customizable: false,
-            flavors: ["Coca-Cola Zero"]
-        },
-        guarana_lata: {
-            id: 'guarana_lata',
-            name: "Guaraná Lata",
-            description: "Guaraná gelado 350ml",
-            price: 5.00,
-            category: "drinks",
-            image: "https://images.unsplash.com/photo-1629203851122-3726ecdf080e?w=400&h=300&fit=crop&crop=center",
-            customizable: false,
-            flavors: ["Guaraná Antarctica"]
-        },
-        guarana_zero_lata: {
-            id: 'guarana_zero_lata',
-            name: "Guaraná Zero Lata",
-            description: "Guaraná Zero gelado 350ml",
-            price: 5.00,
-            category: "drinks",
-            image: "https://images.unsplash.com/photo-1629203851122-3726ecdf080e?w=400&h=300&fit=crop&crop=center",
-            customizable: false,
-            flavors: ["Guaraná Zero"]
-        },
-        fanta_lata: {
-            id: 'fanta_lata',
-            name: "Fanta Lata",
-            description: "Fanta gelada 350ml",
-            price: 5.00,
-            category: "drinks",
-            image: "https://images.unsplash.com/photo-1629203851122-3726ecdf080e?w=400&h=300&fit=crop&crop=center",
-            customizable: false,
-            flavors: ["Laranja", "Uva", "Maracujá"]
-        },
-        coca_1l: {
-            id: 'coca_1l',
-            name: "Coca-Cola 1L",
-            description: "Coca-Cola 1L para compartilhar",
+        refri_1l: {
+            id: 'refri_1l',
+            name: "Refrigerante 1L",
+            description: "Refrigerante 1L para compartilhar - Escolha o sabor",
             price: 10.00,
             category: "drinks",
             image: "https://images.unsplash.com/photo-1581636625402-29d2c5305b85?w=400&h=300&fit=crop&crop=center",
             customizable: false,
-            flavors: ["Coca-Cola Original"]
-        },
-        guarana_1l: {
-            id: 'guarana_1l',
-            name: "Guaraná 1L",
-            description: "Guaraná 1L para compartilhar",
-            price: 10.00,
-            category: "drinks",
-            image: "https://images.unsplash.com/photo-1581636625402-29d2c5305b85?w=400&h=300&fit=crop&crop=center",
-            customizable: false,
-            flavors: ["Guaraná Antarctica"]
-        },
-        fanta_1l: {
-            id: 'fanta_1l',
-            name: "Fanta 1L",
-            description: "Fanta 1L para compartilhar",
-            price: 10.00,
-            category: "drinks",
-            image: "https://images.unsplash.com/photo-1581636625402-29d2c5305b85?w=400&h=300&fit=crop&crop=center",
-            customizable: false,
-            flavors: ["Laranja", "Uva", "Maracujá"]
+            flavors: ["Coca Litro", "Guaraná Litro", "Fanta Litro"]
         }
     },
 
