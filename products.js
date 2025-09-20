@@ -56,7 +56,7 @@ const PRODUCTS = {
             description: "Água mineral natural gelada 500ml",
             price: 3.00,
             category: "drinks",
-            image: "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=400&h=300&fit=crop&crop=center",
+            image: "images/aguamineral.jpg",
             customizable: false
         },
         agua_gas: {
@@ -65,7 +65,7 @@ const PRODUCTS = {
             description: "Água mineral com gás gelada 500ml",
             price: 4.00,
             category: "drinks",
-            image: "https://images.unsplash.com/photo-1523362628745-0c100150b504?w=400&h=300&fit=crop&crop=center",
+            image: "images/aguacomgas.jpg",
             customizable: false
         },
         refri_lata: {
@@ -74,7 +74,7 @@ const PRODUCTS = {
             description: "Refrigerante gelado 350ml - Escolha o sabor",
             price: 5.00,
             category: "drinks",
-            image: "https://images.unsplash.com/photo-1629203851122-3726ecdf080e?w=400&h=300&fit=crop&crop=center",
+            image: "images/refri-lata.jpg",
             customizable: false,
             flavors: ["Lata Coca", "Lata Coca Zero", "Lata Guaraná", "Lata Guaraná Zero", "Lata Fanta"]
         },
@@ -84,7 +84,7 @@ const PRODUCTS = {
             description: "Refrigerante 1L para compartilhar - Escolha o sabor",
             price: 10.00,
             category: "drinks",
-            image: "https://images.unsplash.com/photo-1581636625402-29d2c5305b85?w=400&h=300&fit=crop&crop=center",
+            image: "images/refri-1l.jpg",
             customizable: false,
             flavors: ["Coca Litro", "Guaraná Litro", "Fanta Litro"]
         }
